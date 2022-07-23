@@ -18,19 +18,14 @@
 	<h3>Pantry</h3>
 	<div id="pantry_board" class="shadow">
 		<div id="spot_0" class="spot">
-			<div class="additive additive_chai"></div>
 		</div>
 		<div id="spot_1" class="spot">
-			<div class="additive additive_vanilla"></div>
 		</div>
 		<div id="spot_2" class="spot">
-			<div class="additive additive_milk"></div>
 		</div>
 		<div id="spot_3" class="spot">
-			<div class="additive additive_sugar"></div>
 		</div>
 		<div id="spot_4" class="spot">
-			<div class="additive additive_honey"></div>
 		</div>
 	</div>
 </div>
@@ -43,6 +38,7 @@
 <script type="text/javascript">
 
 // Javascript HTML templates
+var jstpl_pantry='<div class="additive ${additive_type}" id="pantry_${x}"></div>';
 
 /*
 // Example:

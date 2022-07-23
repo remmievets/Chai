@@ -673,8 +673,74 @@ class chaisji extends Table
         $result['players'] = self::getCollectionFromDb( $sql );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
-  
+        // Gather some general information first
+        $result['ordered_flavors'] = $this->ordered_flavors;
+        $result['ordered_pantry'] = $this->ordered_pantry;
+
+        // We want to send the data from the following locations to JS code
+        //  faceup_ability -> 3 card abilities
+        //  market_1 - market_3 -> market rows
+        //  pantry_board -> 5 items for pantry board
+        //  plaza -> cards available in plaza
+        //  tip_jars -> the available tip jars this round
+        //  player_$color -> information for player boards and cards
+        // TBD
+        //  Round ?
+        //  Money ?
+        foreach ($this->gameDataLocs as $pos => $loc)
+        {
+            // These locations just need to send the key data as an array
+            $result[$loc] = array();
+            $this->fillArrayItems($result[$loc], $this->tokens->getTokensInLocation($loc));
+        }
+
+        // Player boards will contain teas, flavors, pantry items, cards, and money
+        // TBD
+
+        // There is no hidden information in this game
+
         return $result;
+    }
+
+    /*
+        toJsId
+
+        Translate ID to JavaScript ID
+    */
+    public function toJsId($id) 
+    {
+        return $id;
+    }
+
+    /*
+        toPhpId
+
+        Translate ID to PHP ID
+    */
+    public function toPhpId($id) 
+    {
+        return $id;
+    }
+
+    /*
+        fillArrayWithTokenKey
+
+        Copy items from $tokenKeyArray and put then into an array indexed by the key.
+    */
+    public function fillArrayWithTokenKey(&$array, $tokenKeyArray) 
+    {
+        foreach ( $tokenKeyArray as $pos => $item ) {
+            $jsId = $this->toJsId($item ['key']);
+            $array [$jsId] = $item;
+        }
+    }
+
+    public function fillArrayItems(&$array, $itemList) 
+    {
+        foreach ( $itemList as $pos => $item ) {
+            $jsId = $this->toJsId($item ['key']);
+            array_push($array, $jsId);
+        }
     }
 
     /*
@@ -708,10 +774,16 @@ class chaisji extends Table
         $this->tokens->initGlobalIndex('GINDEX', 0);
         $num = $this->getNumPlayers();
         // 1. Tea flavors.  12 each of mint jasmine lemon ginger berries and lavender
-        $resa = array ('mint','jasmine','lemon','ginger','berries','lavender');
-        foreach ( $resa as $res ) 
+        foreach ( $this->ordered_flavors as $res ) 
         {
-            $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 12);
+            if (strcasecmp($res,'wild') != 0)
+            {
+                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 12);
+            }
+            else
+            {
+                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 6);
+            }
         }
         $this->tokens->shuffle('flavor_stock');
         // Create 3 rows of 6 tokens for the market
@@ -719,10 +791,16 @@ class chaisji extends Table
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_2');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_3');
 	    // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 wild
-        $resb = array ('milk','sugar','honey','vanilla','chai');
-        foreach ( $resb as $res ) 
+        foreach ( $this->ordered_pantry as $res ) 
         {
-            $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 10);
+            if (strcasecmp($res,'wild') != 0)
+            {
+                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 10);
+            }
+            else
+            {
+                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 5);
+            }
         }
         $this->tokens->shuffle('pantry_stock');
         $this->tokens->pickTokensForLocation(5, 'pantry_stock', 'pantry_board');

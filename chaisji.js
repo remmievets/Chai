@@ -23,7 +23,8 @@ define([
 ],
 function (dojo, declare) {
     return declare("bgagame.chaisji", ebg.core.gamegui, {
-        constructor: function(){
+        constructor: function()
+        {
             console.log('chaisji constructor');
               
             // Here, you can init the global variables of your user interface
@@ -32,6 +33,9 @@ function (dojo, declare) {
             console.log("Chai constructor");
             this.flavorwidth = 75;
             this.flavorheight = 75;
+
+            this.flavorConstant = null;
+            this.pantryConstant = null;
         },
         
         /*
@@ -62,63 +66,77 @@ function (dojo, declare) {
                 }
             
                 // TODO: Set up your game interface here, according to "gamedatas"
+                // Save game constants from gamedatas
+                this.flavorConstant = gamedatas.ordered_flavors;
+                this.pantryConstant = gamedatas.ordered_pantry;
+
                 // Setup possible flavors for row 1
                 this.flavorRow1 = new ebg.stock();
+                this.flavorRow1.extra_classes = 'flavor';
                 this.flavorRow1.create(this, $('row_1'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow1.image_items_per_row = 8;
-                this.flavorRow1.extra_classes = 'flavor';
 
                 for (var flav = 0; flav < this.flavorRow1.image_items_per_row; flav++) 
                 {
-                    this.flavorRow1.addItemType(flav, flav, g_gamethemeurl + 'img/flavors.png', flav);
+                    this.flavorRow1.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
                 }
 
                 // Setup possible flavors for row 2
                 this.flavorRow2 = new ebg.stock();
+                this.flavorRow2.extra_classes = 'flavor';
                 this.flavorRow2.create(this, $('row_2'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow2.image_items_per_row = 8;
-                this.flavorRow2.extra_classes = 'flavor';
 
                 for (var flav = 0; flav < this.flavorRow2.image_items_per_row; flav++) 
                 {
-                    this.flavorRow2.addItemType(flav, flav, g_gamethemeurl + 'img/flavors.png', flav);
+                    this.flavorRow2.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
                 }
 
                 // Setup possible flavors for row 3
                 this.flavorRow3 = new ebg.stock();
+                this.flavorRow3.extra_classes = 'flavor';
                 this.flavorRow3.create(this, $('row_3'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow3.image_items_per_row = 8;
-                this.flavorRow3.extra_classes = 'flavor';
 
                 for (var flav = 0; flav < this.flavorRow3.image_items_per_row; flav++) 
                 {
                     this.flavorRow3.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
                 }
 
-                // Add some lemons to row_1
-                this.flavorRow1.addToStock(0);
-                this.flavorRow1.addToStock(1);
-                this.flavorRow1.addToStock(2);
-                this.flavorRow1.addToStock(3);
-                this.flavorRow1.addToStock(4);
-                this.flavorRow1.addToStock(5);
- 
-                this.flavorRow2.addToStock(0);
-                this.flavorRow2.addToStock(0);
-                this.flavorRow2.addToStock(0);
-                this.flavorRow2.addToStock(0);
-                this.flavorRow2.addToStock(0);
-                this.flavorRow2.addToStock(0);
+                // Setup flavor rows
+                console.log("Setup Market");
+                for (let x in gamedatas.market_1)
+                {
+                    let t = this.getStockIdentifer(gamedatas.market_1[x])
+                    this.flavorRow1.addToStock(t);
+                }
+                for (let x in gamedatas.market_2)
+                {
+                    let t = this.getStockIdentifer(gamedatas.market_2[x])
+                    this.flavorRow2.addToStock(t);
+                }
+                for (let x in gamedatas.market_3)
+                {
+                    let t = this.getStockIdentifer(gamedatas.market_3[x])
+                    this.flavorRow3.addToStock(t);
+                }
 
-                this.flavorRow3.addToStock(0);
-                this.flavorRow3.addToStock(0);
-                this.flavorRow3.addToStock(0);
-                this.flavorRow3.addToStock(0);
-                this.flavorRow3.addToStock(0);
-                this.flavorRow3.addToStock(0);
+                // Setup pantry
+                console.log("Start Pantry");
+                var x = 0;
+                for (let p in gamedatas.pantry_board)
+                {
+                    // Create the div
+                    var pantry_div = this.format_block('jstpl_pantry', 
+                        {additive_type : this.getAdditiveIdentifer(gamedatas.pantry_board[p]),
+                         x : x});
+                    // Place the div
+                    dojo.place(pantry_div, 'spot_' + x);
+                    x++;
+                }
 
                 dojo.connect( this.flavorRow1, 'onChangeSelection', this, 'onFlavorSelectionChanged' );
 
@@ -220,17 +238,41 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
         
-        /*
-        
-            Here, you can defines some utility methods that you can use everywhere in your javascript
-            script.
-        
-        */
+        // Finds the integer index into a flavor item from a string
+        getStockIdentifer : function( flavorItem ) 
+        {
+            var selectedItem = 0;
+            for (let i=0; i<this.flavorConstant.length; i++)
+            {
+                if (flavorItem.endsWith(this.flavorConstant[i]))
+                {
+                    selectedItem = i;
+                }
+            }
+            return selectedItem;
+        },
+
+        // Get the CSS additive string from an additive "pantry_#_$add"
+        //  Convert "pantry_#_$add" to "additive_$add"
+        getAdditiveIdentifer : function( additiveItem ) 
+        {
+            var selectedItem = 'additive_honey';
+            for (let i=0; i<this.pantryConstant.length; i++)
+            {
+                if (additiveItem.endsWith(this.pantryConstant[i]))
+                {
+                    selectedItem = 'additive_' + this.pantryConstant[i];
+                }
+            }
+            return selectedItem;
+        },
 
 
         ///////////////////////////////////////////////////
         //// Player's action
-        onFlavorSelectionChanged : function() {
+        onFlavorSelectionChanged : function() 
+        {
+            console.log('onFlavorSelectionChanged');
             var items = this.flavorRow1.getSelectedItems();
 
             if (items.length > 0) {
