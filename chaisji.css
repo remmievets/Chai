@@ -51,89 +51,66 @@
 
 /* Class to put light shadow around objects */
 .shadow {
-	-moz-box-shadow: 1px 1px 2px 1px #222;
-	-webkit-box-shadow: 1px 1px 2px 1px #222;
-	-o-box-shadow: 1px 1px 2px 1px #222;
-	box-shadow: 1px 1px 2px 1px #222;
+    -moz-box-shadow: 1px 1px 2px 1px #222;
+    -webkit-box-shadow: 1px 1px 2px 1px #222;
+    -o-box-shadow: 1px 1px 2px 1px #222;
+    box-shadow: 1px 1px 2px 1px #222;
 }
 
 .anchor {
-	position: relative;
-	width: 100%;
-	max-width: 1076px; 
-	margin: auto;
-	float: left;
-	display: block;
+    position: relative;
+    width: 100%;
+    max-width: 1076px; 
+    margin: auto;
+    float: left;
+    display: block;
 }
 
 .board_area {
-	margin-right: 10px;
-	text-align: center;
-	position: relative;
-	float: left;
-	z-index: -1;
+    margin-right: 10px;
+    text-align: center;
+    position: relative;
+    float: left;
 }
 
 #market_board {
-	width: 480px;
-	height: 400px;
-	position: relative;
-	display: in-block;
-	background-image: url('img/market.png');
-	background-color: rgba(255, 255, 255, 0.4);
-    background-blend-mode: lighten;	
-	z-index: -1;
+    width: 480px;
+    height: 400px;
+    position: relative;
+    display: in-block;
+    background-image: url('img/market.png');
+    background-color: rgba(255, 255, 255, 0.4);
+    background-blend-mode: lighten; 
 }
 
 #market_rows {
-	position: relative;
-	display: block;
-	width: 480px;
-	float: left;
-	top: 73px;
-	z-index: -1;
-}
-
-.test_boarder {
-	border: 3px solid #73AD21;
-}
-
-.test_red {
-	background-color: red;
-	opacity: 0.3;
+    position: relative;
+    display: block;
+    width: 480px;
+    float: left;
+    top: 73px;
 }
 
 .market_row {
     position: relative;
-	display: flex;
-	height: 75px;
+    display: flex;
+    height: 75px;
     gap: 11px;
-	padding: 12px;
-	z-index: -1;
-}
-
-/* Blank flavor block, takes space and no pic */
-.bflavor {
-	width: 75px;
-	height: 75px;
-	position: relative;
-	border-radius: 10px;
+    padding: 12px;
 }
 
 /* Image flavor block.  Include this and subclass */
-.flavor {
-	width: 75px;
-	height: 75px;
-	position: relative;
-	background-image: url('img/flavors.png');
-	box-shadow: 3px 3px 5px grey;
-	border-radius: 10px;
-	z-index: 2;
+.stockitem {
+    box-shadow: 3px 3px 5px grey;
+    border-radius: 10px;
 }
 
-.flavor:hover {
-	box-shadow: 0px 0px 1px 3px darkblue !important;
-	opacity: 0.9;
+.stockitem:hover {
+    box-shadow: 0px 0px 1px 5px darkblue !important;
+}   
+
+.stockitem_selected {
+    border: 4px solid yellow ! important;
 }
 
 .flavor_lemon    { background-position:    0px 0px; }
@@ -145,19 +122,19 @@
 .flavor_wild     { background-position: -450px 0px; }
 
 #pantry_board {
-	width: 400px;
-	height: 400px;
-	position: relative;
-	display: in-block;
-	background-image: url('img/pantry.png');
-	background-color: rgba(255, 255, 255, 0.4);
-    background-blend-mode: lighten;	
+    width: 400px;
+    height: 400px;
+    position: relative;
+    display: in-block;
+    background-image: url('img/pantry.png');
+    background-color: rgba(255, 255, 255, 0.4);
+    background-blend-mode: lighten; 
 }
 
 .spot {
-	width: 90px;
-	height: 90px;
-	position: absolute;
+    width: 90px;
+    height: 90px;
+    position: absolute;
 }
 #spot_0 { left: 100px; top:  80px; }
 #spot_1 { left: 203px; top:  87px; }
@@ -166,12 +143,12 @@
 #spot_4 { left:  72px; top: 180px; }
 
 .additive {
-	width: 90px;
-	height: 90px;
-	position: absolute;
-	background-image: url('img/additives.png');
-	box-shadow: 3px 3px 5px grey;
-	border-radius: 45px;
+    width: 90px;
+    height: 90px;
+    position: absolute;
+    background-image: url('img/additives.png');
+    box-shadow: 3px 3px 5px grey;
+    border-radius: 45px;
 }
 .additive_chai    { background-position:    0px   0px; }
 .additive_vanilla { background-position:  -90px   0px; }
@@ -181,27 +158,26 @@
 .additive_wild    { background-position: -180px -90px; }
 
 .additive:hover {
-	box-shadow: 0px 0px 1px 3px darkblue !important;
-	opacity: 0.9;
+    box-shadow: 0px 0px 1px 5px darkblue !important;
 }
 
 #customer_area {
-	margin-top: 1em;
+    margin-top: 1em;
 }
 
 .playertablecard {
-	display: in-block;
-	position: relative;
-	margin-top: 5px;
-	width: 71px;
-	height: 122px;
-	background-image: url('img/chaiCards5x11-small.png');
+    display: in-block;
+    position: relative;
+    margin-top: 5px;
+    width: 71px;
+    height: 122px;
+    background-image: url('img/chaiCards5x11-small.png');
 }
 
 .gmk_stoneicon {
-	width: 14px;
-	height: 14px;
-	display: inline-block;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
     position: relative;
     background-repeat: no-repeat;
     background-image: url( 'img/stone_icons.png');
@@ -211,25 +187,25 @@
 }
 
 .gmk_stoneicon_000000 {
-	background-position:0px 0px
+    background-position:0px 0px
 }
 
 .gmk_stoneicon_ffffff {
-	background-position:-14px 0px
+    background-position:-14px 0px
 }
 
 .player_board {
-	clear: both;
+    clear: both;
 }
 .res_counter {
-	display: inline-block;
-	margin-top: 5px;
+    display: inline-block;
+    margin-top: 5px;
 }
 .flavor_resource {
-	display: inline-block;
-	height: 1.2em;
-	width: 1.2em;
-	text-align: center;
+    display: inline-block;
+    height: 1.2em;
+    width: 1.2em;
+    text-align: center;
 }
 
 .icon_mint     { background-color: #4bbc38; }

@@ -31,9 +31,9 @@
     function getGameName() {
         return "chaisji";
     }    
-  	function build_page( $viewArgs )
-  	{		
-  	    // Get players & players number
+    function build_page( $viewArgs )
+    {       
+        // Get players & players number
         $players = $this->game->loadPlayersBasicInfos();
         $players_nbr = count( $players );
 
@@ -79,7 +79,7 @@
 
 
         /*********** Do not change anything below this line  ************/
-  	}
+    }
   }
   
 

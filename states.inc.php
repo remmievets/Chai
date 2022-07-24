@@ -64,29 +64,29 @@ $machinestates = array(
     // Note: ID=2 => your first state
 
     2 => array(
-    		"name" => "playerTurnAction",
-    		"description" => clienttranslate('${actplayer} must visit market or pantry or invite a customer'),
-    		"descriptionmyturn" => clienttranslate('${actplayer} must visit the market or visit the pantry or invite a customer and use an ability'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( 
-		   0 => "market", 
-		   1 => "pantry",
-		   2 => "inviteCustomer" ),
-    		"transitions" => array( 
-		  "next" => 3, 
-		  "loopback" => 2 )
+        "name" => "playerTurnAction",
+        "description" => clienttranslate('${actplayer} must visit market or pantry or invite a customer'),
+        "descriptionmyturn" => clienttranslate('${actplayer} must visit the market or visit the pantry or invite a customer and use an ability'),
+        "type" => "activeplayer",
+        "possibleactions" => array( 
+            0 => "market", 
+            1 => "pantry",
+            2 => "inviteCustomer" ),
+        "transitions" => array( 
+        "next" => 3, 
+        "loopback" => 2 )
     ),
     3 => array(
-    		"name" => "playerTurnOptional",
-    		"description" => clienttranslate('${actplayer} may fulfill a customer order'),
-    		"descriptionmyturn" => clienttranslate('${actplayer} may fulfill a customer order from your teahouse or from the plaza'),
-    		"type" => "activeplayer",
-    		"possibleactions" => array( 
-		   0 => "fulfillOrder", 
-		   1 => "pass" ),
-    		"transitions" => array( 
-		  "next" => 99, // for now go to end of game
-		  "loopback" => 2 )
+        "name" => "playerTurnOptional",
+        "description" => clienttranslate('${actplayer} may fulfill a customer order'),
+        "descriptionmyturn" => clienttranslate('${actplayer} may fulfill a customer order from your teahouse or from the plaza'),
+        "type" => "activeplayer",
+        "possibleactions" => array( 
+            0 => "fulfillOrder", 
+            1 => "pass" ),
+        "transitions" => array( 
+        "next" => 99, // for now go to end of game
+        "loopback" => 2 )
     ),
     
     // 10 - Next Players turn
@@ -104,6 +104,3 @@ $machinestates = array(
     )
 
 );
-
-
-

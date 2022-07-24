@@ -36,6 +36,9 @@ function (dojo, declare) {
 
             this.flavorConstant = null;
             this.pantryConstant = null;
+
+            // Array of current dojo connections (needed for method addEventToClass)
+            this.connections = [];
         },
         
         /*
@@ -72,10 +75,12 @@ function (dojo, declare) {
 
                 // Setup possible flavors for row 1
                 this.flavorRow1 = new ebg.stock();
-                this.flavorRow1.extra_classes = 'flavor';
                 this.flavorRow1.create(this, $('row_1'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow1.image_items_per_row = 8;
+                this.flavorRow1.setSelectionAppearance('class');
+                this.flavorRow1.selectionClass = 'stockitem_selected';
+                dojo.connect( this.flavorRow1, "onChangeSelection", this, "onMarketClick" );
 
                 for (var flav = 0; flav < this.flavorRow1.image_items_per_row; flav++) 
                 {
@@ -84,10 +89,12 @@ function (dojo, declare) {
 
                 // Setup possible flavors for row 2
                 this.flavorRow2 = new ebg.stock();
-                this.flavorRow2.extra_classes = 'flavor';
                 this.flavorRow2.create(this, $('row_2'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow2.image_items_per_row = 8;
+                this.flavorRow2.setSelectionAppearance('class');
+                this.flavorRow2.selectionClass = 'stockitem_selected';
+                dojo.connect( this.flavorRow2, "onChangeSelection", this, "onMarketClick" );
 
                 for (var flav = 0; flav < this.flavorRow2.image_items_per_row; flav++) 
                 {
@@ -96,10 +103,12 @@ function (dojo, declare) {
 
                 // Setup possible flavors for row 3
                 this.flavorRow3 = new ebg.stock();
-                this.flavorRow3.extra_classes = 'flavor';
                 this.flavorRow3.create(this, $('row_3'), this.flavorwidth, this.flavorheight);
             
                 this.flavorRow3.image_items_per_row = 8;
+                this.flavorRow3.setSelectionAppearance('class');
+                this.flavorRow3.selectionClass = 'stockitem_selected';
+                dojo.connect( this.flavorRow3, "onChangeSelection", this, "onMarketClick" );
 
                 for (var flav = 0; flav < this.flavorRow3.image_items_per_row; flav++) 
                 {
@@ -127,6 +136,7 @@ function (dojo, declare) {
                 // Setup pantry
                 console.log("Start Pantry");
                 var x = 0;
+                var pantry_div;
                 for (let p in gamedatas.pantry_board)
                 {
                     // Create the div
@@ -138,10 +148,14 @@ function (dojo, declare) {
                     x++;
                 }
 
-                dojo.connect( this.flavorRow1, 'onChangeSelection', this, 'onFlavorSelectionChanged' );
+                //dojo.query('.additive').connect('onclick', this, 'onFlavorSelectionChanged');
+                //dojo.query('.additive').connect('click', this, 'onFlavorSelectionChanged');
+                //dojo.query('.additive').connect('mouseover', this, 'onFlavorSelectionChanged');
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
+
+                this.addEventToClass("additive", "onclick", "onAdditive");
             }
             catch (e) 
             {
@@ -219,18 +233,14 @@ function (dojo, declare) {
             {            
                 switch( stateName )
                 {
-/*               
-                 Example:
- 
-                 case 'myGameState':
+                 case 'playerTurnAction':
                     
                     // Add 3 action buttons in the action status bar:
                     
-                    this.addActionButton( 'button_1_id', _('Button 1 label'), 'onMyMethodToCall1' ); 
-                    this.addActionButton( 'button_2_id', _('Button 2 label'), 'onMyMethodToCall2' ); 
-                    this.addActionButton( 'button_3_id', _('Button 3 label'), 'onMyMethodToCall3' ); 
+                    this.addActionButton( 'button_1_id', _('Visit the Market'), 'onMyMethodToCall' ); 
+                    this.addActionButton( 'button_2_id', _('Visit the Pantry'), 'onMyMethodToCall' ); 
+                    this.addActionButton( 'button_3_id', _('Reserve Customer'), 'onMyMethodToCall' ); 
                     break;
-*/
                 }
             }
         },        
@@ -270,9 +280,20 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Player's action
-        onFlavorSelectionChanged : function() 
+        onMarketClick: function(control_name, item_id)
         {
-            console.log('onFlavorSelectionChanged');
+            console.log('onMarketClick ' + control_name + ' ' + item_id);
+        },
+
+        onMyMethodToCall: function(control_name, item_id)
+        {
+            console.log('onMyMethodToCall' + control_name + ' ' + item_id);
+        },
+
+        onFlavor : function(event) 
+        {
+            console.log('onFlavor');
+            /*
             var items = this.flavorRow1.getSelectedItems();
 
             if (items.length > 0) {
@@ -289,6 +310,30 @@ function (dojo, declare) {
                     this.flavorRow1.unselectAll();
                 }
             }
+            */
+        },
+
+        onAdditive : function(event) 
+        {
+            console.log('onAdditive');
+            /*
+            var items = this.flavorRow1.getSelectedItems();
+
+            if (items.length > 0) {
+                if (this.checkAction('playCard', true)) {
+                    // Can play a card
+
+                    var card_id = items[0].id;
+                    console.log("on playCard "+card_id);
+
+                    this.flavorRow1.unselectAll();
+                } else if (this.checkAction('giveCards')) {
+                    // Can give cards => let the player select some cards
+                } else {
+                    this.flavorRow1.unselectAll();
+                }
+            }
+            */
         },
         /*
         

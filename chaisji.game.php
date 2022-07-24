@@ -572,8 +572,8 @@ class Tokens extends APP_GameClass {
 
 class chaisji extends Table
 {
-	function __construct( )
-	{
+    function __construct( )
+    {
         // Your global variables labels:
         //  Here, you can assign labels to global variables you are using for this game.
         //  You can use any number of global variables with IDs between 10 and 99.
@@ -584,7 +584,7 @@ class chaisji extends Table
         
         self::initGameStateLabels( array( 
                 "game_round" => 10
-		));
+        ));
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -592,13 +592,13 @@ class chaisji extends Table
             //      ...
         $this->tokens = new Tokens();
         $this->gameinit = false;
-	}
-	
+    }
+    
     protected function getGameName( )
     {
-		// Used for translations and stuff. Please do not modify.
+        // Used for translations and stuff. Please do not modify.
         return "chaisji";
-    }	
+    }   
 
     /*
         setupNewGame:
@@ -790,7 +790,7 @@ class chaisji extends Table
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_1');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_2');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_3');
-	    // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 wild
+        // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 wild
         foreach ( $this->ordered_pantry as $res ) 
         {
             if (strcasecmp($res,'wild') != 0)
@@ -808,16 +808,16 @@ class chaisji extends Table
         $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
         $this->tokens->shuffle('tip_stock');
         $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_jars');
-	    // 4. Ability cards.  11 total in game, deal 3
+        // 4. Ability cards.  11 total in game, deal 3
         $this->tokens->createTokensPack('ability_{INDEX}', "ability_deck", 11);
         $this->tokens->shuffle('ability_deck');
         $this->tokens->pickTokensForLocation(3, 'ability_deck', 'faceup_ability');
-	    // 5. Tea tokens. 6 per player
-	    // 6. Customer cards. 11 per player
-	    //	1 in reserve
-	    //	1 in plaza
-	    //	6 in deck
-	    //	Remaining are discarded
+        // 5. Tea tokens. 6 per player
+        // 6. Customer cards. 11 per player
+        //  1 in reserve
+        //  1 in plaza
+        //  6 in deck
+        //  Remaining are discarded
         foreach ( $this->players_basic as $player_id => $player_info ) 
         {
             $color = $player_info ['player_color'];
@@ -954,13 +954,13 @@ class chaisji extends Table
 
     function zombieTurn( $state, $active_player )
     {
-    	$statename = $state['name'];
-    	
+        $statename = $state['name'];
+        
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
                 default:
                     $this->gamestate->nextState( "zombiePass" );
-                	break;
+                    break;
             }
 
             return;
