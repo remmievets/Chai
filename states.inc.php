@@ -7,7 +7,7 @@
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
  * -----
- * 
+ *
  * states.inc.php
  *
  * chaisji game states description
@@ -49,7 +49,7 @@
 
 //    !! It is not a good idea to modify this file when a game is running !!
 
- 
+
 $machinestates = array(
 
     // The initial state. Please do not modify.
@@ -60,39 +60,65 @@ $machinestates = array(
         "action" => "stGameSetup",
         "transitions" => array( "" => 2 )
     ),
-    
-    // Note: ID=2 => your first state
 
+    // Note: ID=2 => your first state
+    // These are the mandatory actions that the player must choose from on every turn
     2 => array(
         "name" => "playerTurnAction",
         "description" => clienttranslate('${actplayer} must visit market or pantry or invite a customer'),
-        "descriptionmyturn" => clienttranslate('${actplayer} must visit the market or visit the pantry or invite a customer and use an ability'),
+        "descriptionmyturn" => clienttranslate('${you} must visit the market or visit the pantry or invite a customer and use an ability'),
         "type" => "activeplayer",
-        "possibleactions" => array( 
-            0 => "market", 
-            1 => "pantry",
-            2 => "inviteCustomer" ),
-        "transitions" => array( 
-        "next" => 3, 
-        "loopback" => 2 )
+        "possibleactions" => array(
+            0 => "playMarket",
+            1 => "playPantry",
+            2 => "playReserveCustomer",
+            3 => "playAbility"
+            ),
+        "transitions" => array(
+            "next" => 25,
+            "advance" => 20,
+            "loopback" => 2 )
     ),
-    3 => array(
-        "name" => "playerTurnOptional",
+    20 => array(
+        "name" => "playerFulfillOrder",
         "description" => clienttranslate('${actplayer} may fulfill a customer order'),
-        "descriptionmyturn" => clienttranslate('${actplayer} may fulfill a customer order from your teahouse or from the plaza'),
+        "descriptionmyturn" => clienttranslate('${you} may fulfill a customer order from your teahouse or from the plaza'),
         "type" => "activeplayer",
-        "possibleactions" => array( 
-            0 => "fulfillOrder", 
+        "possibleactions" => array(
+            0 => "playOrder",
             1 => "pass" ),
-        "transitions" => array( 
-        "next" => 99, // for now go to end of game
-        "loopback" => 2 )
+        "transitions" => array(
+            "next" => 25 )
     ),
-    
-    // 10 - Next Players turn
-    // 20 - End of round
-    // 90 - prepare for end of game
-   
+    25 => array(
+        "name" => "gameNextPlayerTurn",
+        "description" => clienttranslate('Advance active player'),
+        "type" => "game",
+        "action" => "st_gameTurnNextPlayer",
+        "updateGameProgression" => true,
+        "transitions" => array(
+            "next" => 2,
+            "endRound" => 50 )
+    ),
+    50 => array(
+        "name" => "gameNextRound",
+        "description" => clienttranslate('Setup for next round'),
+        "type" => "game",
+        "action" => "st_gameNextRound",
+        "transitions" => array(
+            "next" => 51,
+            "endGame" => 99 )
+    ),
+    51 => array(
+        "name" => "playerNextRound",
+        "description" => clienttranslate('${actplayer} must select an ability to replace'),
+        "descriptionmyturn" => clienttranslate('${you} must select an ability to replace with new ability card'),
+        "type" => "activeplayer",
+        "possibleactions" => array(
+            0 => "playNewAbility" ),
+        "transitions" => array(
+            "next" => 2 )
+    ),
     // Final state.
     // Please do not modify (and do not overload action/args methods).
     99 => array(
