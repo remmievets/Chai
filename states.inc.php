@@ -74,6 +74,7 @@ $machinestates = array(
             2 => "playReserveCustomer",
             3 => "playAbility"
             ),
+        "args" => "arg_playerTurnMain",
         "transitions" => array(
             "next" => 25,
             "advance" => 20,

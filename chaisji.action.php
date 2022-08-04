@@ -39,30 +39,60 @@
       }
     } 
     
-    // TODO: defines your action entry points there
-
-
-    /*
-    
-    Example:
-    
-    public function myAction()
+    // Action from JS - play market
+    public function playMarket() 
     {
-        self::setAjaxMode();     
-
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
-
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
     }
-    
-    */
+
+    // Action from JS - play pantry
+    public function playPantry() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
+
+    // Action from JS - play reserve customer
+    public function playReserveCustomer() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
+
+    // Action from JS - play ability
+    public function playAbility() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
+
+    // Action from JS - play order
+    public function playOrder() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
+
+    // Action from JS - pass
+    public function pass() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
+
+    // Action from JS - play new ability (start of new round)
+    public function playNewAbility() 
+    {
+      self::setAjaxMode();
+      $this->game->action_playerPass();
+      self::ajaxResponse( );
+    }
 
   }
-  
-

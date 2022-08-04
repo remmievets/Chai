@@ -148,10 +148,6 @@ function (dojo, declare) {
                     x++;
                 }
 
-                //dojo.query('.additive').connect('onclick', this, 'onFlavorSelectionChanged');
-                //dojo.query('.additive').connect('click', this, 'onFlavorSelectionChanged');
-                //dojo.query('.additive').connect('mouseover', this, 'onFlavorSelectionChanged');
-
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -175,7 +171,8 @@ function (dojo, declare) {
         //
         onEnteringState: function( stateName, args )
         {
-            console.log( 'Entering state: '+stateName );
+            console.log('Entering state: '+stateName);
+            console.log(args);
             
             switch( stateName )
             {
@@ -201,7 +198,7 @@ function (dojo, declare) {
         //
         onLeavingState: function( stateName )
         {
-            console.log( 'Leaving state: '+stateName );
+            console.log('Leaving state: '+stateName);
             
             switch( stateName )
             {
@@ -227,7 +224,8 @@ function (dojo, declare) {
         //        
         onUpdateActionButtons: function( stateName, args )
         {
-            console.log( 'onUpdateActionButtons: '+stateName );
+            console.log('onUpdateActionButtons: '+stateName);
+            console.log(args);
                       
             if( this.isCurrentPlayerActive() )
             {            
@@ -237,8 +235,8 @@ function (dojo, declare) {
                     
                     // Add 3 action buttons in the action status bar:
                     
-                    this.addActionButton( 'button_1_id', _('Visit the Market'), 'onMyMethodToCall' ); 
-                    this.addActionButton( 'button_2_id', _('Visit the Pantry'), 'onMyMethodToCall' ); 
+                    this.addActionButton( 'button_1_id', _('Visit Market'), 'onMyMethodToCall' ); 
+                    this.addActionButton( 'button_2_id', _('Visit Pantry'), 'onMyMethodToCall' ); 
                     this.addActionButton( 'button_3_id', _('Reserve Customer'), 'onMyMethodToCall' ); 
                     break;
                 }
@@ -277,22 +275,40 @@ function (dojo, declare) {
             return selectedItem;
         },
 
+        // More convenient version of ajaxcall, do not to specify game name, and any of the handlers
+        ajaxAction : function(action, args) 
+        {
+            console.log("ajax action " + action);
+            if (!args) 
+            {
+                args = [];
+            }
+            args.lock = true;
+
+            if (this.checkAction(action)) 
+            {
+                this.ajaxcall("/" + this.game_name + "/" + this.game_name + "/" + action + ".html", args, this, function( result ) {}, function( is_error ) {});
+            }
+        },
 
         ///////////////////////////////////////////////////
         //// Player's action
         onMarketClick: function(control_name, item_id)
         {
             console.log('onMarketClick ' + control_name + ' ' + item_id);
+            this.ajaxAction("playMarket", {});
         },
 
         onMyMethodToCall: function(control_name, item_id)
         {
             console.log('onMyMethodToCall' + control_name + ' ' + item_id);
+            this.ajaxAction("playPantry", {});
         },
 
         onFlavor : function(event) 
         {
             console.log('onFlavor');
+            this.ajaxAction("playAbility", {});
             /*
             var items = this.flavorRow1.getSelectedItems();
 
@@ -316,6 +332,7 @@ function (dojo, declare) {
         onAdditive : function(event) 
         {
             console.log('onAdditive');
+            this.ajaxAction("playAbility", {});
             /*
             var items = this.flavorRow1.getSelectedItems();
 
