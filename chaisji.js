@@ -136,16 +136,40 @@ function (dojo, declare) {
                 // Setup pantry
                 console.log("Start Pantry");
                 var x = 0;
-                var pantry_div;
-                for (let p in gamedatas.pantry_board)
+                for (let t of gamedatas.pantry_board)
                 {
                     // Create the div
-                    var pantry_div = this.format_block('jstpl_pantry', 
-                        {additive_type : this.getAdditiveIdentifer(gamedatas.pantry_board[p]),
-                         x : x});
+                    var my_div = this.createToken(t);
                     // Place the div
-                    dojo.place(pantry_div, 'spot_' + x);
+                    dojo.place(my_div, 'spot_' + x);
                     x++;
+                }
+
+                // Setup abilities
+                for (let t of gamedatas.faceup_ability)
+                {
+                    // Create the div for the item
+                    var my_div = this.createToken(t);
+                    // Place the div in the plaza
+                    dojo.place(my_div, 'ability_area');
+                }
+
+                // Setup plaza
+                for (let t of gamedatas.plaza)
+                {
+                    // Create the div for the item
+                    var my_div = this.createToken(t);
+                    // Place the div in the plaza
+                    dojo.place(my_div, 'plaza_area');
+                }
+
+                // Setup tips
+                for (let t of gamedatas.tip_jars)
+                {
+                    // Create the div for the item
+                    var my_div = this.createToken(t);
+                    // Place the div in the plaza
+                    dojo.place(my_div, 'tip_area');
                 }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
@@ -246,13 +270,24 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
         
+        // Get the first part of a token - this is the identifying type of token
+        // For example customer_1_FFFFFFFF is converted to customer
+        // @returns string
+        getTokenMainType : function( token ) 
+        {
+            var tt = token.split('_');
+            var tokenType = tt[0];
+            return tokenType;
+        },
+
         // Finds the integer index into a flavor item from a string
-        getStockIdentifer : function( flavorItem ) 
+        // @returns integer value
+        getStockIdentifer : function( token ) 
         {
             var selectedItem = 0;
             for (let i=0; i<this.flavorConstant.length; i++)
             {
-                if (flavorItem.endsWith(this.flavorConstant[i]))
+                if (token.endsWith(this.flavorConstant[i]))
                 {
                     selectedItem = i;
                 }
@@ -260,19 +295,57 @@ function (dojo, declare) {
             return selectedItem;
         },
 
-        // Get the CSS additive string from an additive "pantry_#_$add"
+        // Get the CSS additive string from an additive "pantry_#_$add" (token name)
         //  Convert "pantry_#_$add" to "additive_$add"
-        getAdditiveIdentifer : function( additiveItem ) 
+        // @returns string
+        getAdditiveIdentifer : function( token ) 
         {
             var selectedItem = 'additive_honey';
             for (let i=0; i<this.pantryConstant.length; i++)
             {
-                if (additiveItem.endsWith(this.pantryConstant[i]))
+                if (token.endsWith(this.pantryConstant[i]))
                 {
                     selectedItem = 'additive_' + this.pantryConstant[i];
                 }
             }
             return selectedItem;
+        },
+
+        // Create a div object from a token name
+        // @returns tokenDiv object
+        createToken : function(token) 
+        {
+            var tokenMainType = this.getTokenMainType(token);
+            var tokenClasses = '';
+            switch (tokenMainType) 
+            {
+                case 'card':
+                    tokenClasses = 'abilitycard ' + token;
+                    break;
+                case 'customer':
+                    tokenClasses = 'card ' + token;
+                    break;
+                case 'flavor':
+                    break;
+                case 'pantry':
+                    tokenClasses = 'additive ' + this.getAdditiveIdentifer(token);
+                    break;
+                case 'tea':
+                    break;
+                case 'tip':
+                    tokenClasses = 'tipjar';
+                    break;
+                default:
+                    break;
+            }
+            var tokenDiv = this.format_block('jstpl_token', 
+                {
+                    "id" : token,
+                    "classes" : tokenClasses,
+                });
+            console.log("CreateToken");
+            console.log(tokenDiv);
+            return tokenDiv;
         },
 
         // More convenient version of ajaxcall, do not to specify game name, and any of the handlers

@@ -726,7 +726,6 @@ class chaisji extends Table
         //  player_$color -> information for player boards and cards
         // TBD
         //  Round ?
-        //  Money ?
         foreach ($this->gameDataLocs as $pos => $loc)
         {
             // These locations just need to send the key data as an array
@@ -734,10 +733,17 @@ class chaisji extends Table
             $this->fillArrayItems($result[$loc], $this->tokens->getTokensInLocation($loc));
         }
 
-        // Player boards will contain teas, flavors, pantry items, cards, and money
-        // TBD
+        // Player boards will contain teas, flavors, pantry items, cards, and (money?)
+        foreach ($result['players'] as $player) 
+        {
+            $color = $player['color'];
+            $loc = "player_$color";
+            $result[$loc] = array();
+            $this->fillArrayItems($result[$loc], $this->tokens->getTokensInLocation($loc));
+        }
 
-        // There is no hidden information in this game
+        // The tip jars are hidden from both players.  Players just know the number available.
+        // TBD
 
         return $result;
     }
@@ -852,8 +858,8 @@ class chaisji extends Table
         $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
         $this->tokens->shuffle('tip_stock');
         $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_jars');
-        // 4. Ability cards.  11 total in game, deal 3
-        $this->tokens->createTokensPack('ability_{INDEX}', "ability_deck", 11);
+        // 4. Ability cards.  8 total in game, deal 3
+        $this->tokens->createTokensPack('card_ability_{INDEX}', "ability_deck", 8);
         $this->tokens->shuffle('ability_deck');
         $this->tokens->pickTokensForLocation(3, 'ability_deck', 'faceup_ability');
         // 5. Tea tokens. 6 per player

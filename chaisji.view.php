@@ -28,9 +28,23 @@
   
   class view_chaisji_chaisji extends game_view
   {
-    function getGameName() {
+    function getGameName() 
+    {
         return "chaisji";
-    }    
+    }
+
+    function getTemplateName() 
+    {
+        return self::getGameName() . "_" . self::getGameName();
+    }
+
+    function processPlayerBlock($player_id, $player) 
+    {
+        $color = $player['player_color'];
+        $name = $player['player_name'];
+        $this->page->insert_block("player_board", array("COLOR" => $color, "PLAYER_NAME" => $name ));
+    }
+
     function build_page( $viewArgs )
     {       
         // Get players & players number
@@ -38,44 +52,27 @@
         $players_nbr = count( $players );
 
         /*********** Place your code below:  ************/
-
-
-        /*
-        
-        // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
-
-        // Display a specific number / string
-        $this->tpl['MY_VARIABLE_ELEMENT'] = $number_to_display;
-
-        // Display a string to be translated in all languages: 
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::_("A string to be translated");
-
-        // Display some HTML content of your own:
-        $this->tpl['MY_VARIABLE_ELEMENT'] = self::raw( $some_html_code );
-        
-        */
-        
-        /*
-        
-        // Example: display a specific HTML block for each player in this game.
-        // (note: the block is defined in your .tpl file like this:
-        //      <!-- BEGIN myblock --> 
-        //          ... my HTML code ...
-        //      <!-- END myblock --> 
-        
-
-        $this->page->begin_block( "chaisji_chaisji", "myblock" );
-        foreach( $players as $player )
-        {
-            $this->page->insert_block( "myblock", array( 
-                                                    "PLAYER_NAME" => $player['player_name'],
-                                                    "SOME_VARIABLE" => $some_value
-                                                    ...
-                                                     ) );
+        $template = self::getTemplateName();
+        $num = $players_nbr;
+    
+        $this->page->begin_block($template, "player_board");
+        // make current player panel first
+        global $g_user;
+        $cplayer = $g_user->get_id();
+        if (isset($players[$cplayer])) 
+        { // may be not set if spectator
+            $ciplayer = $players[$cplayer];
+            $this->processPlayerBlock($cplayer, $ciplayer);
         }
-        
-        */
 
+        // Make all other player boards
+        foreach ( $players as $player_id => $player ) 
+        {
+            if ($player_id != $cplayer)
+            {
+                $this->processPlayerBlock($player_id, $player);
+            }
+        }
 
 
         /*********** Do not change anything below this line  ************/
