@@ -723,7 +723,7 @@ class chaisji extends Table
         //  pantry_board -> 5 items for pantry board
         //  plaza -> cards available in plaza
         //  tip_jars -> the available tip jars this round
-        //  player_$color -> information for player boards and cards
+        //  pboard / player_id -> information for player boards and cards
         // TBD
         //  Round ?
         foreach ($this->gameDataLocs as $pos => $loc)
@@ -734,16 +734,25 @@ class chaisji extends Table
         }
 
         // Player boards will contain teas, flavors, pantry items, cards, and (money?)
-        foreach ($result['players'] as $player) 
+        $result['pboard'] = array();
+        $this->players_basic = $this->loadPlayersBasicInfos();
+        foreach ($this->players_basic as $player_id => $player_info)
         {
-            $color = $player['color'];
+            $color = $player_info['player_color'];
             $loc = "player_$color";
-            $result[$loc] = array();
-            $this->fillArrayItems($result[$loc], $this->tokens->getTokensInLocation($loc));
+            $idx = $player_id;
+            $result['pboard'][$idx] = array();
+            $this->fillArrayItems($result['pboard'][$idx], $this->tokens->getTokensInLocation($loc));
         }
 
         // The tip jars are hidden from both players.  Players just know the number available.
-        // TBD
+        $loc = 'tip_jars';
+        $result[$loc] = array();
+        $tips = $this->tokens->getTokensInLocation($loc);
+        for ($x = 0; $x < count($tips); $x++)
+        {
+            array_push($result[$loc], "tip_pos_$x");
+        }
 
         return $result;
     }

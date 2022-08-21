@@ -52,6 +52,12 @@
 				<h3 style="color: #{COLOR}">{PLAYER_NAME}</h3>
 			</div>
 			<div id="pboard_{COLOR}" class="pboard pboard_{COLOR} shadow">
+				<div id="pflavor_{COLOR}">
+				</div>
+				<div id="padditives_{COLOR}">
+				</div>
+				<div id="ptea_{COLOR}">
+				</div>
 			</div>
 			<div id="pcards_{COLOR}">
 			</div>

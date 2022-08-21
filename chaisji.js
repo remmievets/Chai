@@ -134,7 +134,6 @@ function (dojo, declare) {
                 }
 
                 // Setup pantry
-                console.log("Start Pantry");
                 var x = 0;
                 for (let t of gamedatas.pantry_board)
                 {
@@ -170,6 +169,18 @@ function (dojo, declare) {
                     var my_div = this.createToken(t);
                     // Place the div in the plaza
                     dojo.place(my_div, 'tip_area');
+                }
+
+                // Handle items on player boards
+                for (let p of gamedatas.playerorder)
+                {
+                    for (let t of gamedatas.pboard[p])
+                    {
+                        // Create the div for the item
+                        var my_div = this.createToken(t);
+                        // Place the div on the player board
+                        dojo.place(my_div, 'pboard_space');
+                    }
                 }
 
                 // Setup game notifications to handle (see "setupNotifications" method below)
@@ -280,6 +291,15 @@ function (dojo, declare) {
             return tokenType;
         },
 
+        // Most items are 3 parts <type>_<uniqueid>_<subtype>.  This removes the unique id
+        // @returns string
+        getGenericType : function( token ) 
+        {
+            var tt = token.split('_');
+            var tokenGeneric = tt[0] + '_' + tt[2];
+            return tokenGeneric;
+        },
+
         // Finds the integer index into a flavor item from a string
         // @returns integer value
         getStockIdentifer : function( token ) 
@@ -331,6 +351,7 @@ function (dojo, declare) {
                     tokenClasses = 'additive ' + this.getAdditiveIdentifer(token);
                     break;
                 case 'tea':
+                    tokenClasses = 'tea ' + this.getGenericType(token);
                     break;
                 case 'tip':
                     tokenClasses = 'tipjar';
@@ -343,7 +364,7 @@ function (dojo, declare) {
                     "id" : token,
                     "classes" : tokenClasses,
                 });
-            console.log("CreateToken");
+            //console.log("CreateToken");
             console.log(tokenDiv);
             return tokenDiv;
         },

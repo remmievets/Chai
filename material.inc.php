@@ -32,7 +32,7 @@ $this->ordered_pantry = array ('chai', 'vanilla', 'milk', 'sugar', 'honey', 'wil
 
 // These are the game locations in the database where we will send information in the getAllDatas function.
 // For these items the JS only needs to know about the key value
-$this->gameDataLocs = array('faceup_ability', 'market_1', 'market_2', 'market_3', 'plaza', 'pantry_board', 'tip_jars');
+$this->gameDataLocs = array('faceup_ability', 'market_1', 'market_2', 'market_3', 'plaza', 'pantry_board');
 
 /*
 
