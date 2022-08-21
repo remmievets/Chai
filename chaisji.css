@@ -86,12 +86,15 @@
 }
 
 .market_row {
-    position: relative;
+    position: absolute;
     display: flex;
     height: 75px;
-    gap: 11px;
-    padding: 12px;
+    width: 475px;
+    gap: 6px;
 }
+#market_1 { left: 4px; top:  81px; }
+#market_2 { left: 4px; top: 182px; }
+#market_3 { left: 4px; top: 283px; }
 
 /* Image flavor block.  Include this and subclass */
 .stockitem {
@@ -108,17 +111,16 @@
 }
 
 .flavor {
-    position: relative;
+    display: inline-flex;
     width: 75px;
     height: 75px;
-    display: inline-flex;
     border-radius: 10px;
     background-image: url('img/flavors.png');
 }
 
 .flavor_lemon    { background-position:    0px 0px; }
 .flavor_mint     { background-position:  -75px 0px; }
-.flavor_berry    { background-position: -150px 0px; }
+.flavor_berries  { background-position: -150px 0px; }
 .flavor_jasmine  { background-position: -225px 0px; }
 .flavor_lavender { background-position: -300px 0px; }
 .flavor_ginger   { background-position: -375px 0px; }
@@ -165,35 +167,18 @@
     box-shadow: 0px 0px 1px 5px darkblue !important;
 }
 
-#customer_area {
+.area_margin {
     margin-top: 1em;
 }
 
 .player_board {
     clear: both;
 }
-.res_counter {
-    display: inline-block;
-    margin-top: 5px;
-}
-.flavor_resource {
-    display: inline-block;
-    height: 1.2em;
-    width: 1.2em;
-    text-align: center;
-}
 
-.icon_mint     { background-color: #4bbc38; }
-.icon_jasmine  { background-color: #ffffff; }
-.icon_ginger   { background-color: #ddc785; }
-.icon_lemon    { background-color: #e8ea06; }
-.icon_berry    { background-color: #db1c26; }
-.icon_lavender { background-color: #b090cf; }
-.icon_chai    { background-color: #ac6e31; }
-.icon_vanilla { background-color: #000000; color: #fff; }
-.icon_milk    { background-color: #7ecdcc; }
-.icon_sugar   { background-color: #d8a0ae; }
-.icon_honey   { background-color: #ea7130; }
+.nameslot {
+	font-size: medium;
+	text-shadow: -1px 0 grey, 0 1px grey, 1px 0 grey, 0 -1px grey;
+}
 
 .pboard {
     width: 750px;
@@ -204,13 +189,21 @@
 
 .pboard_full {
     width: 100%;
-    position: relative;
+    position: block;
     margin-top: 10px;
     margin-bottom: 10px;
 }
 
-.pboard_full>* {
-    display: block;
+.pflavor {
+    position: absolute;
+    left: 164px; 
+    top:  12px;
+}
+
+.padditives {
+    position: absolute;
+    left: 164px; 
+    top:  226px;
 }
 
 .pboard_330000 {

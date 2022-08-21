@@ -16,10 +16,11 @@
  */
 
 define([
-    "dojo","dojo/_base/declare",
+    "dojo",
+    "dojo/_base/declare",
     "ebg/core/gamegui",
     "ebg/counter",
-    "ebg/stock"
+    "ebg/zone"
 ],
 function (dojo, declare) {
     return declare("bgagame.chaisji", ebg.core.gamegui, {
@@ -30,7 +31,6 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
-            console.log("Chai constructor");
             this.flavorwidth = 75;
             this.flavorheight = 75;
 
@@ -60,77 +60,36 @@ function (dojo, declare) {
             console.log(gamedatas);
             try 
             {
-                // Setting up player boards
-                for( var player_id in gamedatas.players )
-                {
-                    var player = gamedatas.players[player_id];
-                         
-                    // TODO: Setting up players boards if needed
-                }
-            
-                // TODO: Set up your game interface here, according to "gamedatas"
                 // Save game constants from gamedatas
                 this.flavorConstant = gamedatas.ordered_flavors;
                 this.pantryConstant = gamedatas.ordered_pantry;
 
-                // Setup possible flavors for row 1
-                this.flavorRow1 = new ebg.stock();
-                this.flavorRow1.create(this, $('row_1'), this.flavorwidth, this.flavorheight);
-            
-                this.flavorRow1.image_items_per_row = 8;
-                this.flavorRow1.setSelectionAppearance('class');
-                this.flavorRow1.selectionClass = 'stockitem_selected';
-                dojo.connect( this.flavorRow1, "onChangeSelection", this, "onMarketClick" );
-
-                for (var flav = 0; flav < this.flavorRow1.image_items_per_row; flav++) 
-                {
-                    this.flavorRow1.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
-                }
-
-                // Setup possible flavors for row 2
-                this.flavorRow2 = new ebg.stock();
-                this.flavorRow2.create(this, $('row_2'), this.flavorwidth, this.flavorheight);
-            
-                this.flavorRow2.image_items_per_row = 8;
-                this.flavorRow2.setSelectionAppearance('class');
-                this.flavorRow2.selectionClass = 'stockitem_selected';
-                dojo.connect( this.flavorRow2, "onChangeSelection", this, "onMarketClick" );
-
-                for (var flav = 0; flav < this.flavorRow2.image_items_per_row; flav++) 
-                {
-                    this.flavorRow2.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
-                }
-
-                // Setup possible flavors for row 3
-                this.flavorRow3 = new ebg.stock();
-                this.flavorRow3.create(this, $('row_3'), this.flavorwidth, this.flavorheight);
-            
-                this.flavorRow3.image_items_per_row = 8;
-                this.flavorRow3.setSelectionAppearance('class');
-                this.flavorRow3.selectionClass = 'stockitem_selected';
-                dojo.connect( this.flavorRow3, "onChangeSelection", this, "onMarketClick" );
-
-                for (var flav = 0; flav < this.flavorRow3.image_items_per_row; flav++) 
-                {
-                    this.flavorRow3.addItemType(flav, 0, g_gamethemeurl + 'img/flavors.png', flav);
-                }
-
                 // Setup flavor rows
-                console.log("Setup Market");
-                for (let x in gamedatas.market_1)
+                for (let t of gamedatas.market_1)
                 {
-                    let t = this.getStockIdentifer(gamedatas.market_1[x])
-                    this.flavorRow1.addToStock(t);
+                    // Create the div
+                    var my_div = this.createToken(t);
+                    // Place the div
+                    dojo.place(my_div, 'market_1');
                 }
-                for (let x in gamedatas.market_2)
+                for (let t of gamedatas.market_2)
                 {
-                    let t = this.getStockIdentifer(gamedatas.market_2[x])
-                    this.flavorRow2.addToStock(t);
+                    // Create the div
+                    var my_div = this.createToken(t);
+                    // Place the div
+                    dojo.place(my_div, 'market_2');
                 }
-                for (let x in gamedatas.market_3)
+                //this.marketZone3 = new ebg.zone();
+                //this.marketZone3.create(this, 'market_3', 320, 75);
+                //this.marketZone3.setPattern('grid');
+                for (let t of gamedatas.market_3)
                 {
-                    let t = this.getStockIdentifer(gamedatas.market_3[x])
-                    this.flavorRow3.addToStock(t);
+                    // Create the div
+                    var my_div = this.createToken(t);
+                    // Place the div
+                    dojo.place(my_div, 'market_3');
+                    // Now add the id to the zone
+                    //this.marketZone3.placeInZone(t);
                 }
 
                 // Setup pantry
@@ -340,15 +299,16 @@ function (dojo, declare) {
             switch (tokenMainType) 
             {
                 case 'card':
-                    tokenClasses = 'abilitycard ' + token;
+                    tokenClasses = 'shadow abilitycard ' + token;
                     break;
                 case 'customer':
-                    tokenClasses = 'card ' + token;
+                    tokenClasses = 'shadow card ' + token;
                     break;
                 case 'flavor':
+                    tokenClasses = 'shadow flavor ' + this.getGenericType(token);
                     break;
                 case 'pantry':
-                    tokenClasses = 'additive ' + this.getAdditiveIdentifer(token);
+                    tokenClasses = 'shadow additive ' + this.getAdditiveIdentifer(token);
                     break;
                 case 'tea':
                     tokenClasses = 'tea ' + this.getGenericType(token);
@@ -365,7 +325,7 @@ function (dojo, declare) {
                     "classes" : tokenClasses,
                 });
             //console.log("CreateToken");
-            console.log(tokenDiv);
+            //console.log(tokenDiv);
             return tokenDiv;
         },
 

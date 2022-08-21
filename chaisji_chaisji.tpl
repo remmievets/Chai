@@ -4,11 +4,11 @@
 	<div id="market_area" class="board_area">
 		<h3>Market</h3> 
 		<div id="market_board" class="shadow">
-			<div id="row_1" class="market_row">
+			<div id="market_1" class="market_row">
 			</div>
-			<div id="row_2" class="market_row">
+			<div id="market_2" class="market_row">
 			</div>
-			<div id="row_3" class="market_row">
+			<div id="market_3" class="market_row">
 			</div>
 		</div>
 	</div>
@@ -29,32 +29,34 @@
 		</div>
 	</div>
     
-    <div id="ability_area" class="board_area">
+    <div id="ability_area" class="board_area area_margin">
     </div>
 </div>
 
 <div id="blank_space" class="anchor">
 </div>
 
-<div id="plaza_area" class="anchor">
+<div id="plaza_area" class="anchor area_margin">
 </div>
 
-<div id="tip_area" class="anchor">
+<div id="tip_area" class="anchor area_margin">
 </div>
 
 <div id="blank_space2" class="anchor">
 </div>
 
-<div id="pboard_space" class="anchor">
+<div id="pboard_space" class="anchor area_margin">
 	<!-- BEGIN player_board -->
 		<div id="pboard_full_{COLOR}" class="pboard_full">
 			<div class="nameslot">
 				<h3 style="color: #{COLOR}">{PLAYER_NAME}</h3>
 			</div>
 			<div id="pboard_{COLOR}" class="pboard pboard_{COLOR} shadow">
-				<div id="pflavor_{COLOR}">
+				<div id="pflavor_{COLOR}" class="pflavor">
+                    here
 				</div>
-				<div id="padditives_{COLOR}">
+				<div id="padditives_{COLOR}" class="padditives">
+                    here
 				</div>
 				<div id="ptea_{COLOR}">
 				</div>
