@@ -19,8 +19,7 @@ define([
     "dojo",
     "dojo/_base/declare",
     "ebg/core/gamegui",
-    "ebg/counter",
-    "ebg/zone"
+    "ebg/counter"
 ],
 function (dojo, declare) {
     return declare("bgagame.chaisji", ebg.core.gamegui, {
@@ -60,6 +59,17 @@ function (dojo, declare) {
             console.log(gamedatas);
             try 
             {
+                // Setting up player boards
+                for( var player_id in gamedatas.players )
+                {
+                    //var player = gamedatas.players[player_id];
+                    var color = gamedatas.players[player_id].color;
+                         
+                    // Setting up players boards if needed
+                    var playerBoardDiv = dojo.byId('player_board_' + player_id);
+                    dojo.place('playerpanel_' + color, playerBoardDiv);
+                }
+            
                 // Save game constants from gamedatas
                 this.flavorConstant = gamedatas.ordered_flavors;
                 this.pantryConstant = gamedatas.ordered_pantry;
@@ -79,17 +89,12 @@ function (dojo, declare) {
                     // Place the div
                     dojo.place(my_div, 'market_2');
                 }
-                //this.marketZone3 = new ebg.zone();
-                //this.marketZone3.create(this, 'market_3', 320, 75);
-                //this.marketZone3.setPattern('grid');
                 for (let t of gamedatas.market_3)
                 {
                     // Create the div
                     var my_div = this.createToken(t);
                     // Place the div
                     dojo.place(my_div, 'market_3');
-                    // Now add the id to the zone
-                    //this.marketZone3.placeInZone(t);
                 }
 
                 // Setup pantry
@@ -138,7 +143,7 @@ function (dojo, declare) {
                         // Create the div for the item
                         var my_div = this.createToken(t);
                         // Place the div on the player board
-                        dojo.place(my_div, 'pboard_space');
+                        this.placeTokenOnPlayerBoard(t, my_div, gamedatas.players[p].color);
                     }
                 }
 
@@ -259,21 +264,6 @@ function (dojo, declare) {
             return tokenGeneric;
         },
 
-        // Finds the integer index into a flavor item from a string
-        // @returns integer value
-        getStockIdentifer : function( token ) 
-        {
-            var selectedItem = 0;
-            for (let i=0; i<this.flavorConstant.length; i++)
-            {
-                if (token.endsWith(this.flavorConstant[i]))
-                {
-                    selectedItem = i;
-                }
-            }
-            return selectedItem;
-        },
-
         // Get the CSS additive string from an additive "pantry_#_$add" (token name)
         //  Convert "pantry_#_$add" to "additive_$add"
         // @returns string
@@ -292,7 +282,7 @@ function (dojo, declare) {
 
         // Create a div object from a token name
         // @returns tokenDiv object
-        createToken : function(token) 
+        createToken : function( token ) 
         {
             var tokenMainType = this.getTokenMainType(token);
             var tokenClasses = '';
@@ -324,13 +314,41 @@ function (dojo, declare) {
                     "id" : token,
                     "classes" : tokenClasses,
                 });
-            //console.log("CreateToken");
-            //console.log(tokenDiv);
             return tokenDiv;
         },
 
+        // Place a token onto a player board - based on player color.
+        //      flavors goto - pflavor_{COLOR} (max 12)
+        //      additives goto - padditives_{COLOR} (max 6)
+        //      teas goto - ptea_{COLOR}
+        //      customers goto - pcards_{COLOR}
+        placeTokenOnPlayerBoard : function( token, tokenDiv, playerColor )
+        {
+            var tokenMainType = this.getTokenMainType(token);
+            var locationBase = '';
+            switch (tokenMainType)
+            {
+                case 'customer':
+                    locationBase = 'pcards_' + playerColor.toString();
+                    break;
+                case 'flavor':
+                    locationBase = 'pflavor_' + playerColor.toString();
+                    break;
+                case 'pantry':
+                    locationBase = 'padditives_' + playerColor.toString();
+                    break;
+                case 'tea':
+                    locationBase = 'ptea_' + playerColor.toString();
+                    break;
+                default:
+                    break;
+            }
+            console.log(locationBase);
+            dojo.place(tokenDiv, locationBase);
+        },
+
         // More convenient version of ajaxcall, do not to specify game name, and any of the handlers
-        ajaxAction : function(action, args) 
+        ajaxAction : function( action, args ) 
         {
             console.log("ajax action " + action);
             if (!args) 
@@ -347,19 +365,19 @@ function (dojo, declare) {
 
         ///////////////////////////////////////////////////
         //// Player's action
-        onMarketClick: function(control_name, item_id)
+        onMarketClick: function( control_name, item_id )
         {
             console.log('onMarketClick ' + control_name + ' ' + item_id);
             this.ajaxAction("playMarket", {});
         },
 
-        onMyMethodToCall: function(control_name, item_id)
+        onMyMethodToCall: function( control_name, item_id )
         {
             console.log('onMyMethodToCall' + control_name + ' ' + item_id);
             this.ajaxAction("playPantry", {});
         },
 
-        onFlavor : function(event) 
+        onFlavor : function( event ) 
         {
             console.log('onFlavor');
             this.ajaxAction("playAbility", {});
@@ -383,10 +401,10 @@ function (dojo, declare) {
             */
         },
 
-        onAdditive : function(event) 
+        onAdditive : function( event ) 
         {
             console.log('onAdditive');
-            this.ajaxAction("playAbility", {});
+            //this.ajaxAction("playAbility", {});
             /*
             var items = this.flavorRow1.getSelectedItems();
 

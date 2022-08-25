@@ -28,15 +28,17 @@
 			</div>
 		</div>
 	</div>
-    
-    <div id="ability_area" class="board_area area_margin">
-    </div>
+
+	<div id="ability_area" class="board_area area_margin">
+		<h3>Abilities</h3>
+	</div>
 </div>
 
 <div id="blank_space" class="anchor">
 </div>
 
 <div id="plaza_area" class="anchor area_margin">
+	<h3>Plaza</h3>
 </div>
 
 <div id="tip_area" class="anchor area_margin">
@@ -53,23 +55,39 @@
 			</div>
 			<div id="pboard_{COLOR}" class="pboard pboard_{COLOR} shadow">
 				<div id="pflavor_{COLOR}" class="pflavor">
-                    here
 				</div>
 				<div id="padditives_{COLOR}" class="padditives">
-                    here
 				</div>
-				<div id="ptea_{COLOR}">
+				<div id="ptea_{COLOR}" class="ptea">
 				</div>
 			</div>
 			<div id="pcards_{COLOR}">
+			</div>
+		</div>
+		<!-- player panel -->
+		<div id="playerpanel_{COLOR}" class="playerpanel">
+			<div>
+				<div id="counter_lemon_{COLOR}" class="counter ppflavor flavor_lemon textoverlay">2</div>
+				<div id="counter_mint_{COLOR}" class="counter ppflavor flavor_mint textoverlay">2</div>
+				<div id="counter_berries_{COLOR}" class="counter ppflavor flavor_berries textoverlay">2</div>
+				<div id="counter_jasmine_{COLOR}" class="counter ppflavor flavor_jasmine textoverlay">2</div>
+				<div id="counter_lavender_{COLOR}" class="counter ppflavor flavor_lavender textoverlay">2</div>
+				<div id="counter_ginger_{COLOR}" class="counter ppflavor flavor_ginger textoverlay">2</div>
+				<div id="counter_wild_{COLOR}" class="counter ppflavor flavor_wild textoverlay">2</div>
+				<div id="counter_chai_{COLOR}" class="counter ppadditive additive_chai textoverlay">2</div>
+				<div id="counter_vanilla_{COLOR}" class="counter ppadditive additive_vanilla textoverlay">2</div>
+				<div id="counter_milk_{COLOR}" class="counter ppadditive additive_milk textoverlay">2</div>
+				<div id="counter_sugar_{COLOR}" class="counter ppadditive additive_sugar textoverlay">2</div>
+				<div id="counter_honey_{COLOR}" class="counter ppadditive additive_honey textoverlay">2</div>
+				<div id="counter_awild_{COLOR}" class="counter ppadditive additive_wild textoverlay">2</div>
 			</div>
 		</div>
 	<!-- END player_board -->
 </div>
 
 <script type="text/javascript">
-    // Javascript HTML templates
-    var jstpl_token = '<div class="${classes}" id="${id}"></div>';
+	// Javascript HTML templates
+	var jstpl_token = '<div class="${classes}" id="${id}"></div>';
 </script>  
 
 {OVERALL_GAME_FOOTER}

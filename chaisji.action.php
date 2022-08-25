@@ -44,7 +44,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - play pantry
@@ -52,7 +52,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - play reserve customer
@@ -60,7 +60,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - play ability
@@ -68,7 +68,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - play order
@@ -76,7 +76,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - pass
@@ -84,7 +84,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
     // Action from JS - play new ability (start of new round)
@@ -92,7 +92,7 @@
     {
       self::setAjaxMode();
       $this->game->action_playerPass();
-      self::ajaxResponse( );
+      self::ajaxResponse();
     }
 
   }

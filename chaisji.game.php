@@ -250,6 +250,17 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
+    // Update the state of a token
+    function updateStateToken($token_key, $state) 
+    {
+        self::checkState($state);
+        self::checkKey($token_key);
+        $sql = "UPDATE " . $this->table;
+        $sql .= " SET token_state='$state'";
+        $sql .= " WHERE token_key='$token_key'";
+        self::DbQuery($sql);
+    }
+
     // Move cards to specific location
     function moveTokens($tokens, $location, $state = 0) 
     {
@@ -824,14 +835,26 @@ class chaisji extends Table
         return 0;
     }
 
+    function dumpCurrentPlayer()
+    {
+        $this->dump('dumpCurrentPlayer', self::getCurrentPlayerId());
+    }
+
+    function dumpActivePlayer()
+    {
+        $sql = "SELECT player_id id, player_no pno, player_score score, player_color color FROM player ";
+        $data = self::getCollectionFromDb( $sql );
+
+        $this->dump('dumpActivePlayer', $data);
+    }
+
     function initTables() 
     {
         // ROUND will contain the round.  The game is played over 5 rounds.
         $this->tokens->initGlobalIndex('ROUND', 1);
-        $this->tokens->initGlobalIndex('FIRSTPLAYER', $this->getActivePlayerId());
-        // Everyone has the same number of turns, so also keep track of the start player
-        // TBD
+        
         $num = $this->getNumPlayers();
+
         // 1. Tea flavors.  12 each of mint jasmine lemon ginger berries and lavender
         foreach ( $this->ordered_flavors as $res ) 
         {
@@ -845,10 +868,12 @@ class chaisji extends Table
             }
         }
         $this->tokens->shuffle('flavor_stock');
+
         // Create 3 rows of 6 tokens for the market
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_1');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_2');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_3');
+
         // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 wild
         foreach ( $this->ordered_pantry as $res ) 
         {
@@ -863,20 +888,25 @@ class chaisji extends Table
         }
         $this->tokens->shuffle('pantry_stock');
         $this->tokens->pickTokensForLocation(5, 'pantry_stock', 'pantry_board');
+
         // 3. Tip tokens.  6, deal one per player
         $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
         $this->tokens->shuffle('tip_stock');
         $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_jars');
+
         // 4. Ability cards.  8 total in game, deal 3
         $this->tokens->createTokensPack('card_ability_{INDEX}', "ability_deck", 8);
         $this->tokens->shuffle('ability_deck');
         $this->tokens->pickTokensForLocation(3, 'ability_deck', 'faceup_ability');
+
         // 5. Tea tokens. 6 per player
         // 6. Customer cards. 11 per player
         //  1 in reserve
         //  1 in plaza
         //  6 in deck
         //  Remaining are discarded
+        // 7. Money (1 for first player and 2 for everyone else)
+        $money = 1;
         foreach ( $this->players_basic as $player_id => $player_info ) 
         {
             $color = $player_info ['player_color'];
@@ -888,6 +918,10 @@ class chaisji extends Table
             $this->tokens->pickTokensForLocation(1, "player_deck_$color", 'plaza');
             $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
             $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
+            // 7.
+            $this->tokens->createTokensPack("money_$color", "player_$color");
+            $this->tokens->updateStateToken("money_$color", $money);
+            $money = 2;
         }
         // 7. Now shuffle customer deck and deal 2 more to the plaza
         $this->tokens->shuffle('customer_deck');
@@ -895,7 +929,6 @@ class chaisji extends Table
 
         // Commit globals
         $this->tokens->commitGlobalIndex('ROUND');
-        $this->tokens->commitGlobalIndex('FIRSTPLAYER');
     }
 
     public function getNumPlayers() 

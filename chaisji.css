@@ -57,6 +57,16 @@
     box-shadow: 1px 1px 2px 1px #222;
 }
 
+/* item can be selected */
+.active_slot {
+    cursor: pointer;
+    box-shadow: 0px 0px 4px 2px #03afbd !important
+}
+
+.active_slot:hover {
+    box-shadow: 0px 0px 1px 5px darkblue !important;
+}
+
 /* Top level game area class */
 .anchor {
     position: relative;
@@ -96,20 +106,6 @@
 #market_2 { left: 4px; top: 182px; }
 #market_3 { left: 4px; top: 283px; }
 
-/* Image flavor block.  Include this and subclass */
-.stockitem {
-    box-shadow: 3px 3px 5px grey;
-    border-radius: 10px;
-}
-
-.stockitem:hover {
-    box-shadow: 0px 0px 1px 5px darkblue !important;
-}
-
-.stockitem_selected {
-    border: 4px solid yellow ! important;
-}
-
 .flavor {
     display: inline-flex;
     width: 75px;
@@ -118,13 +114,13 @@
     background-image: url('img/flavors.png');
 }
 
-.flavor_lemon    { background-position:    0px 0px; }
-.flavor_mint     { background-position:  -75px 0px; }
-.flavor_berries  { background-position: -150px 0px; }
-.flavor_jasmine  { background-position: -225px 0px; }
-.flavor_lavender { background-position: -300px 0px; }
-.flavor_ginger   { background-position: -375px 0px; }
-.flavor_wild     { background-position: -450px 0px; }
+.flavor_lemon    { background-position: calc(100%/ 6 * 0) 0%; }
+.flavor_mint     { background-position: calc(100%/ 6 * 1) 0%; }
+.flavor_berries  { background-position: calc(100%/ 6 * 2) 0%; }
+.flavor_jasmine  { background-position: calc(100%/ 6 * 3) 0%; }
+.flavor_lavender { background-position: calc(100%/ 6 * 4) 0%; }
+.flavor_ginger   { background-position: calc(100%/ 6 * 5) 0%; }
+.flavor_wild     { background-position: calc(100%/ 6 * 6) 0%; }
 
 #pantry_board {
     width: 400px;
@@ -156,28 +152,25 @@
     border-radius: 45px;
 }
 
-.additive_chai    { background-position:    0px   0px; }
-.additive_vanilla { background-position:  -90px   0px; }
-.additive_milk    { background-position: -180px   0px; }
-.additive_sugar   { background-position:    0px -90px; }
-.additive_honey   { background-position:  -90px -90px; }
-.additive_wild    { background-position: -180px -90px; }
-
-.additive:hover {
-    box-shadow: 0px 0px 1px 5px darkblue !important;
-}
+.additive_chai    { background-position: calc(100%/ 2 * 0) calc(100%/ 1 * 0); }
+.additive_vanilla { background-position: calc(100%/ 2 * 1) calc(100%/ 1 * 0); }
+.additive_milk    { background-position: calc(100%/ 2 * 2) calc(100%/ 1 * 0); }
+.additive_sugar   { background-position: calc(100%/ 2 * 0) calc(100%/ 1 * 1); }
+.additive_honey   { background-position: calc(100%/ 2 * 1) calc(100%/ 1 * 1); }
+.additive_wild    { background-position: calc(100%/ 2 * 2) calc(100%/ 1 * 1); }
 
 .area_margin {
     margin-top: 1em;
 }
 
+/* items for player boards at the bottom of the screen */
 .player_board {
     clear: both;
 }
 
 .nameslot {
-	font-size: medium;
-	text-shadow: -1px 0 grey, 0 1px grey, 1px 0 grey, 0 -1px grey;
+    font-size: medium;
+    text-shadow: -1px 0 grey, 0 1px grey, 1px 0 grey, 0 -1px grey;
 }
 
 .pboard {
@@ -206,31 +199,73 @@
     top:  226px;
 }
 
+.ptea {
+    position: absolute;
+    left: 0px; 
+    top:  0px;
+    width: 150px;
+    height: 329px;
+}
+
 .pboard_330000 {
-    background-image: url(img/chai_playerboard_black.jpg);
+    background-image: url('img/chai_playerboard_black.jpg');
 }
 
 .pboard_00CC00 {
-    background-image: url(img/chai_playerboard_green.jpg);
+    background-image: url('img/chai_playerboard_green.jpg');
 }
 
 .pboard_0000FF {
-    background-image: url(img/chai_playerboard_green.jpg);
+    background-image: url('img/chai_playerboard_green.jpg');
 }
 
 .pboard_FF0000 {
-    background-image: url(img/chai_playerboard_green.jpg);
+    background-image: url('img/chai_playerboard_green.jpg');
 }
 
 .pboard_FFFFFF {
-    background-image: url(img/chai_playerboard_white.jpg);
+    background-image: url('img/chai_playerboard_white.jpg');
+}
+
+/* for player panel */
+.counter {
+    display: inline-block;
+    margin-left: 0px;
+}
+
+/* for player panel */
+.textoverlay {
+    color: antiquewhite;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+    font-weight: bold;
+    font-size: large;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    line-height: 32px;
+}
+
+/* for player panel */
+.ppflavor {
+    width: 30px;
+    border-radius: 10px;
+    background-image: url('img/flavors.png');
+    background-size: 210px;
+}
+
+/* for player panel */
+.ppadditive {
+    width: 60px;
+    height: 60px;
+    background-image: url('img/additives.png');
+    background-size: 180px;
 }
 
 /* tip jar */
 .tipjar {
     display: inline-block;
     position: relative;
-    background-image: url(img/chai_tip_jar.png);
+    background-image: url('img/chai_tip_jar.png');
     width: 90px;
     height: 90px;
     margin-left: 15px;
@@ -242,233 +277,234 @@
     display: inline-block;
     position: relative;
     background-color: white;
-    background-image: url(img/chaiCards5x11-small.jpg);
+    background-image: url('img/chaiCards5x11-small.jpg');
+    background-size: 1200px;
     border-radius: 7px;
     box-shadow: 1px 1px 1px 0px #222;
     z-index: 20;
-    width: 71px;
-    height: 122px;
+    width: 108px;
+    height: 187px;
     margin-left: 15px;
     margin-right: 15px;
 }
 
-.customer_1_330000 {
+.customer_0_330000 {
     background-position: calc(100%/ 10 * 0) calc(100%/ 4 * 0);
 }
 
-.customer_2_330000 {
+.customer_1_330000 {
     background-position: calc(100%/ 10 * 1) calc(100%/ 4 * 0);
 }
 
-.customer_3_330000 {
+.customer_2_330000 {
     background-position: calc(100%/ 10 * 2) calc(100%/ 4 * 0);
 }
 
-.customer_4_330000 {
+.customer_3_330000 {
     background-position: calc(100%/ 10 * 3) calc(100%/ 4 * 0);
 }
 
-.customer_5_330000 {
+.customer_4_330000 {
     background-position: calc(100%/ 10 * 4) calc(100%/ 4 * 0);
 }
 
-.customer_6_330000 {
+.customer_5_330000 {
     background-position: calc(100%/ 10 * 5) calc(100%/ 4 * 0);
 }
 
-.customer_7_330000 {
+.customer_6_330000 {
     background-position: calc(100%/ 10 * 6) calc(100%/ 4 * 0);
 }
 
-.customer_8_330000 {
+.customer_7_330000 {
     background-position: calc(100%/ 10 * 7) calc(100%/ 4 * 0);
 }
 
-.customer_9_330000 {
+.customer_8_330000 {
     background-position: calc(100%/ 10 * 8) calc(100%/ 4 * 0);
 }
 
-.customer_10_330000 {
+.customer_9_330000 {
     background-position: calc(100%/ 10 * 9) calc(100%/ 4 * 0);
 }
 
-.customer_11_330000 {
+.customer_10_330000 {
     background-position: calc(100%/ 10 * 10) calc(100%/ 4 * 0);
 }
 
-.customer_1_00CC00 {
+.customer_0_00CC00 {
     background-position: calc(100%/ 10 * 0) calc(100%/ 4 * 1);
 }
 
-.customer_2_00CC00 {
+.customer_1_00CC00 {
     background-position: calc(100%/ 10 * 1) calc(100%/ 4 * 1);
 }
 
-.customer_3_00CC00 {
+.customer_2_00CC00 {
     background-position: calc(100%/ 10 * 2) calc(100%/ 4 * 1);
 }
 
-.customer_4_00CC00 {
+.customer_3_00CC00 {
     background-position: calc(100%/ 10 * 3) calc(100%/ 4 * 1);
 }
 
-.customer_5_00CC00 {
+.customer_4_00CC00 {
     background-position: calc(100%/ 10 * 4) calc(100%/ 4 * 1);
 }
 
-.customer_6_00CC00 {
+.customer_5_00CC00 {
     background-position: calc(100%/ 10 * 5) calc(100%/ 4 * 1);
 }
 
-.customer_7_00CC00 {
+.customer_6_00CC00 {
     background-position: calc(100%/ 10 * 6) calc(100%/ 4 * 1);
 }
 
-.customer_8_00CC00 {
+.customer_7_00CC00 {
     background-position: calc(100%/ 10 * 7) calc(100%/ 4 * 1);
 }
 
-.customer_9_00CC00 {
+.customer_8_00CC00 {
     background-position: calc(100%/ 10 * 8) calc(100%/ 4 * 1);
 }
 
-.customer_10_00CC00 {
+.customer_9_00CC00 {
     background-position: calc(100%/ 10 * 9) calc(100%/ 4 * 1);
 }
 
-.customer_11_00CC00 {
+.customer_10_00CC00 {
     background-position: calc(100%/ 10 * 10) calc(100%/ 4 * 1);
 }
 
-.customer_1_0000FF {
+.customer_0_0000FF {
     background-position: calc(100%/ 10 * 0) calc(100%/ 4 * 2);
 }
 
-.customer_2_0000FF {
+.customer_1_0000FF {
     background-position: calc(100%/ 10 * 1) calc(100%/ 4 * 2);
 }
 
-.customer_3_0000FF {
+.customer_2_0000FF {
     background-position: calc(100%/ 10 * 2) calc(100%/ 4 * 2);
 }
 
-.customer_4_0000FF {
+.customer_3_0000FF {
     background-position: calc(100%/ 10 * 3) calc(100%/ 4 * 2);
 }
 
-.customer_5_0000FF {
+.customer_4_0000FF {
     background-position: calc(100%/ 10 * 4) calc(100%/ 4 * 2);
 }
 
-.customer_6_0000FF {
+.customer_5_0000FF {
     background-position: calc(100%/ 10 * 5) calc(100%/ 4 * 2);
 }
 
-.customer_7_0000FF {
+.customer_6_0000FF {
     background-position: calc(100%/ 10 * 6) calc(100%/ 4 * 2);
 }
 
-.customer_8_0000FF {
+.customer_7_0000FF {
     background-position: calc(100%/ 10 * 7) calc(100%/ 4 * 2);
 }
 
-.customer_9_0000FF {
+.customer_8_0000FF {
     background-position: calc(100%/ 10 * 8) calc(100%/ 4 * 2);
 }
 
-.customer_10_0000FF {
+.customer_9_0000FF {
     background-position: calc(100%/ 10 * 9) calc(100%/ 4 * 2);
 }
 
-.customer_11_0000FF {
+.customer_10_0000FF {
     background-position: calc(100%/ 10 * 10) calc(100%/ 4 * 2);
 }
 
-.customer_1_FF0000 {
+.customer_0_FF0000 {
     background-position: calc(100%/ 10 * 0) calc(100%/ 4 * 3);
 }
 
-.customer_2_FF0000 {
+.customer_1_FF0000 {
     background-position: calc(100%/ 10 * 1) calc(100%/ 4 * 3);
 }
 
-.customer_3_FF0000 {
+.customer_2_FF0000 {
     background-position: calc(100%/ 10 * 2) calc(100%/ 4 * 3);
 }
 
-.customer_4_FF0000 {
+.customer_3_FF0000 {
     background-position: calc(100%/ 10 * 3) calc(100%/ 4 * 3);
 }
 
-.customer_5_FF0000 {
+.customer_4_FF0000 {
     background-position: calc(100%/ 10 * 4) calc(100%/ 4 * 3);
 }
 
-.customer_6_FF0000 {
+.customer_5_FF0000 {
     background-position: calc(100%/ 10 * 5) calc(100%/ 4 * 3);
 }
 
-.customer_7_FF0000 {
+.customer_6_FF0000 {
     background-position: calc(100%/ 10 * 6) calc(100%/ 4 * 3);
 }
 
-.customer_8_FF0000 {
+.customer_7_FF0000 {
     background-position: calc(100%/ 10 * 7) calc(100%/ 4 * 3);
 }
 
-.customer_9_FF0000 {
+.customer_8_FF0000 {
     background-position: calc(100%/ 10 * 8) calc(100%/ 4 * 3);
 }
 
-.customer_10_FF0000 {
+.customer_9_FF0000 {
     background-position: calc(100%/ 10 * 9) calc(100%/ 4 * 3);
 }
 
-.customer_11_FF0000 {
+.customer_10_FF0000 {
     background-position: calc(100%/ 10 * 10) calc(100%/ 4 * 3);
 }
 
-.customer_1_FFFFFF {
+.customer_0_FFFFFF {
     background-position: calc(100%/ 10 * 0) calc(100%/ 4 * 4);
 }
 
-.customer_2_FFFFFF {
+.customer_1_FFFFFF {
     background-position: calc(100%/ 10 * 1) calc(100%/ 4 * 4);
 }
 
-.customer_3_FFFFFF {
+.customer_2_FFFFFF {
     background-position: calc(100%/ 10 * 2) calc(100%/ 4 * 4);
 }
 
-.customer_4_FFFFFF {
+.customer_3_FFFFFF {
     background-position: calc(100%/ 10 * 3) calc(100%/ 4 * 4);
 }
 
-.customer_5_FFFFFF {
+.customer_4_FFFFFF {
     background-position: calc(100%/ 10 * 4) calc(100%/ 4 * 4);
 }
 
-.customer_6_FFFFFF {
+.customer_5_FFFFFF {
     background-position: calc(100%/ 10 * 5) calc(100%/ 4 * 4);
 }
 
-.customer_7_FFFFFF {
+.customer_6_FFFFFF {
     background-position: calc(100%/ 10 * 6) calc(100%/ 4 * 4);
 }
 
-.customer_8_FFFFFF {
+.customer_7_FFFFFF {
     background-position: calc(100%/ 10 * 7) calc(100%/ 4 * 4);
 }
 
-.customer_9_FFFFFF {
+.customer_8_FFFFFF {
     background-position: calc(100%/ 10 * 8) calc(100%/ 4 * 4);
 }
 
-.customer_10_FFFFFF {
+.customer_9_FFFFFF {
     background-position: calc(100%/ 10 * 9) calc(100%/ 4 * 4);
 }
 
-.customer_11_FFFFFF {
+.customer_10_FFFFFF {
     background-position: calc(100%/ 10 * 10) calc(100%/ 4 * 4);
 }
 
@@ -476,7 +512,7 @@
     display: inline-block;
     position: relative;
     background-color: white;
-    background-image: url(img/chai_ability_cards.jpg);
+    background-image: url('img/chai_ability_cards.jpg');
     border-radius: 7px;
     box-shadow: 1px 1px 1px 0px #222;
     z-index: 20;
@@ -486,72 +522,71 @@
     margin-right: 15px;
 }
 
-.card_ability_1 {
+.card_ability_0 {
     background-position: calc(100%/ 3 * 0) calc(100%/ 1 * 0);
 }
 
-.card_ability_2 {
+.card_ability_1 {
     background-position: calc(100%/ 3 * 1) calc(100%/ 1 * 0);
 }
 
-.card_ability_3 {
+.card_ability_2 {
     background-position: calc(100%/ 3 * 2) calc(100%/ 1 * 0);
 }
 
-.card_ability_4 {
+.card_ability_3 {
     background-position: calc(100%/ 3 * 3) calc(100%/ 1 * 0);
 }
 
-.card_ability_5 {
+.card_ability_4 {
     background-position: calc(100%/ 3 * 0) calc(100%/ 1 * 1);
 }
 
-.card_ability_6 {
+.card_ability_5 {
     background-position: calc(100%/ 3 * 1) calc(100%/ 1 * 1);
 }
 
-.card_ability_7 {
+.card_ability_6 {
     background-position: calc(100%/ 3 * 2) calc(100%/ 1 * 1);
 }
 
-.card_ability_8 {
+.card_ability_7 {
     background-position: calc(100%/ 3 * 3) calc(100%/ 1 * 1);
 }
 
 .tea {
-    display: inline-block;
+    display: inline-flex;
     position: relative;
     z-index: 20;
-    margin-left: 15px;
-    margin-right: 15px;
+    margin-left: 5px;
 }
 
 .tea_330000 {
-    background-image: url(img/chai_tea_black.png);
+    background-image: url('img/chai_tea_black.png');
     width: 62px;
     height: 90px;
 }
 
 .tea_00CC00 {
-    background-image: url(img/chai_tea_green.png);
+    background-image: url('img/chai_tea_green.png');
     width: 51px;
     height: 90px;
 }
 
 .tea_0000FF {
-    background-image: url(img/chai_tea_blue.png);
+    background-image: url('img/chai_tea_blue.png');
     width: 50px;
     height: 90px;
 }
 
 .tea_FF0000 {
-    background-image: url(img/chai_tea_red.png);
+    background-image: url('img/chai_tea_red.png');
     width: 30px;
     height: 90px;
 }
 
 .tea_FFFFFF {
-    background-image: url(img/chai_tea_white.png);
+    background-image: url('img/chai_tea_white.png');
     width: 60px;
     height: 90px;
 }
