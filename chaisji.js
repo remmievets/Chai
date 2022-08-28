@@ -33,6 +33,18 @@ function (dojo, declare) {
 
             // Array of current dojo connections (needed for method addEventToClass)
             this.connections = [];
+
+            // Array for counters
+            this.counters = [];
+
+            // constant for game locations to div
+            this.locToDiv = {'faceup_ability' : 'ability_area', 
+                             'market_1' : 'market_1', 
+                             'market_2' : 'market_2', 
+                             'market_3' : 'market_3', 
+                             'plaza' : 'plaza_area', 
+                             'pantry_board' : 'spot_',
+                             'tip_jars' : 'tip_area'};
         },
         
         /*
@@ -62,96 +74,68 @@ function (dojo, declare) {
                     var playerBoardDiv = dojo.byId('player_board_' + player_id);
                     dojo.place('playerpanel_' + color, playerBoardDiv);
 
+                    // Setup counter for each item by player id
+                    this.counters[player_id] = [];
+                    var counter_div_id = '';
+
                     // Add tip to player board for items - add name of items
                     for (let t of gamedatas.ordered_flavors)
                     {
-                        this.addTooltip('counter_' + t + '_' + color, gamedatas.token_types[t].name, _(''), 1000);
+                        counter_div_id = 'counter_' + t + '_' + color;
+                        this.counters[player_id][t] = new ebg.counter();
+                        this.counters[player_id][t].create(counter_div_id);
+                        this.addTooltip(counter_div_id, gamedatas.token_types[t].name, _(''), 1000);
                     }
                     for (let t of gamedatas.ordered_pantry)
                     {
-                        this.addTooltip('counter_' + t + '_' + color, gamedatas.token_types[t].name, _(''), 1000);
+                        counter_div_id = 'counter_' + t + '_' + color;
+                        this.counters[player_id][t] = new ebg.counter();
+                        this.counters[player_id][t].create(counter_div_id);
+                        this.addTooltip(counter_div_id, gamedatas.token_types[t].name, _(''), 1000);
                     }
                 }
-            
-                // Setup flavor rows
-                for (let t of gamedatas.market_1)
-                {
-                    // Create the div
-                    var my_div = this.createToken(t);
-                    // Place the div
-                    dojo.place(my_div, 'market_1');
-                }
-                for (let t of gamedatas.market_2)
-                {
-                    // Create the div
-                    var my_div = this.createToken(t);
-                    // Place the div
-                    dojo.place(my_div, 'market_2');
-                }
-                for (let t of gamedatas.market_3)
-                {
-                    // Create the div
-                    var my_div = this.createToken(t);
-                    // Place the div
-                    dojo.place(my_div, 'market_3');
-                }
 
-                // Setup pantry
-                var x = 0;
-                for (let t of gamedatas.pantry_board)
+                // Place initial tokens
+                for (let token_info of gamedatas.tokens)
                 {
-                    // Create the div
-                    var my_div = this.createToken(t);
-                    // Place the div
-                    dojo.place(my_div, 'spot_' + x);
-                    x++;
-                }
-
-                // Setup abilities
-                for (let t of gamedatas.faceup_ability)
-                {
-                    // Create the div for the item
-                    var my_div = this.createToken(t);
-                    // Place the div in the plaza
-                    dojo.place(my_div, 'ability_area');
-                    this.addTooltip(t, gamedatas.token_types[t].tooltip, _(''), 1000);
-                }
-
-                // Setup plaza
-                for (let t of gamedatas.plaza)
-                {
-                    // Create the div for the item
-                    var my_div = this.createToken(t);
-                    // Place the div in the plaza
-                    dojo.place(my_div, 'plaza_area');
-                    this.addTooltip(t, gamedatas.token_types[t].tooltip, _(''), 1000);
-                }
-
-                // Setup tips
-                for (let t of gamedatas.tip_jars)
-                {
-                    // Create the div for the item
-                    var my_div = this.createToken(t);
-                    // Place the div in the plaza
-                    dojo.place(my_div, 'tip_area');
-                }
-
-                // Handle items on player boards
-                for (let p of gamedatas.playerorder)
-                {
-                    for (let t of gamedatas.pboard[p])
+                    var x = 0;
+                    for (let t of token_info['items'])
                     {
-                        // Create the div for the item
+                        // Create the div
                         var my_div = this.createToken(t);
-                        // Place the div on the player board
-                        this.placeTokenOnPlayerBoard(t, my_div, gamedatas.players[p].color);
+
+                        // Some divs have special placement rules
+                        if (token_info['loc'].startsWith('player_'))
+                        {
+                            this.placeTokenOnPlayerBoard(t, my_div, gamedatas.players[token_info['player_id']].color);
+
+                            // Increment the number of tokens this player has on the player panel
+                            var tokenItem = this.getTokenSubType(t);
+                            if (typeof this.counters[token_info['player_id']][tokenItem] != 'undefined')
+                            {
+                                this.counters[token_info['player_id']][tokenItem].incValue(1);
+                            }
+                        }
+                        else if (token_info['loc'] == 'pantry_board')
+                        {
+                            // Place the div at value based on index in array
+                            dojo.place(my_div, this.locToDiv[token_info['loc']] + x);
+                        }
+                        else
+                        {
+                            // Place the div
+                            dojo.place(my_div, this.locToDiv[token_info['loc']]);
+                        }
+
+                        // Add tool tip if defined for this item
                         if (typeof gamedatas.token_types[t] != 'undefined') 
                         {
                             this.addTooltip(t, gamedatas.token_types[t].tooltip, _(''), 1000);
                         }
+                        x++;
                     }
                 }
-
+            
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
 
@@ -281,6 +265,15 @@ function (dojo, declare) {
             return tokenType;
         },
 
+        // Get the last part of a token.  There are 3 parts <type>_<uniqueId>_<subtype>.
+        // @returns string
+        getTokenSubType : function( token ) 
+        {
+            var tt = token.split('_');
+            var tokenType = tt[2];
+            return tokenType;
+        },
+
         // Most items are 3 parts <type>_<uniqueid>_<subtype>.  This removes the unique id
         // @returns string
         getGenericType : function( token ) 
@@ -370,6 +363,34 @@ function (dojo, declare) {
                     break;
             }
             dojo.place(tokenDiv, locationBase);
+        },
+
+        // Place a token onto the board at a location
+        //      Update player panel if item goes onto or removed from player board
+        //      Update gamedatas
+        // This handles NEW(0-99), REMOVE(9999), MOVE(100) based on the state value
+        updateTokenOnBoardAndUpdateData : function( player_id, new_location, token, state )
+        {
+            // Add case
+
+            // Determine the type of token being added
+            var tokenMainType = this.getTokenMainType(token);
+
+            // Create new div to hold this item on the board
+            var my_div = this.createToken(token);
+
+            // Update game data
+            this.gamedatas.pboard[player_id].push(token);
+
+            // Here are the valid locations (location -> div destination)
+            //  faceup_ability => ability_area
+            //  market_1 - market_3 => market_1..market_3
+            //  pantry_board => 'spot_' + x, based on index value (or state value)
+            //  plaza => plaza_area
+            //  tip_jars => tip_area
+            //  pboard / player_id -> Use placeTokenOnPlayerBoard
+
+            pboard            
         },
 
         // More convenient version of ajaxcall, do not to specify game name, and any of the handlers
@@ -500,7 +521,7 @@ function (dojo, declare) {
             for (let t of dojo.query(".spot > *"))
             {
                 // Place the div
-                this.slideToObjectAndDestroy(t, 'pboard_space', 1000, 0 );
+                this.slideToObjectAndDestroy(t, 'gameboard', 1000, 0 );
             }
 
             // Save new pantry items
@@ -513,11 +534,12 @@ function (dojo, declare) {
                 // Create the div
                 var my_div = this.createToken(t);
 
-                // Slide from somewhere to final location
-                this.slideTemporaryObject(my_div, 'gameboard', 'pboard_space', 'spot_' + x).play();
-
                 // Place the div
                 dojo.place(my_div, 'spot_' + x);
+
+                // Slide from somewhere to final location
+                //this.slideToObject(t, 'spot_' + x).play();
+                // TBD - the slide does not actually move the div to the correct spot
                 x++;
             }
         },

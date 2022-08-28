@@ -737,35 +737,52 @@ class chaisji extends Table
         //  pantry_board -> 5 items for pantry board
         //  plaza -> cards available in plaza
         //  tip_jars -> the available tip jars this round
-        //  pboard / player_id -> information for player boards and cards
+        //  player_$color -> information for player boards and cards (second loop below)
         // TBD
         //  Round ?
+        $result['tokens'] = array();
+        $locValue = 0;
         foreach ($this->gameDataLocs as $pos => $loc)
         {
-            // These locations just need to send the key data as an array
-            $result[$loc] = array();
-            $this->fillArrayItems($result[$loc], $this->tokens->getTokensInLocation($loc));
+            // Save the location as 'loc' and the array of items at that location in 'items'
+            $result['tokens'][$locValue] = array();
+            $result['tokens'][$locValue]['loc'] = $loc;
+            $result['tokens'][$locValue]['items'] = array();
+
+            if ($loc == 'tip_jars')
+            {
+                // for tip jars the items are hidden
+                $tips = $this->tokens->getTokensInLocation($loc);
+                for ($x = 0; $x < count($tips); $x++)
+                {
+                    array_push($result['tokens'][$locValue]['items'], "tip_pos_$x");
+                }
+            }
+            else
+            {
+                // Normal fill directly from the database
+                $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc));
+            }
+            $locValue++;
         }
 
         // Player boards will contain teas, flavors, pantry items, cards, and (money?)
-        $result['pboard'] = array();
         $this->players_basic = $this->loadPlayersBasicInfos();
         foreach ($this->players_basic as $player_id => $player_info)
         {
+            // Setup info
             $color = $player_info['player_color'];
             $loc = "player_$color";
             $idx = $player_id;
-            $result['pboard'][$idx] = array();
-            $this->fillArrayItems($result['pboard'][$idx], $this->tokens->getTokensInLocation($loc));
-        }
 
-        // The tip jars are hidden from both players.  Players just know the number available.
-        $loc = 'tip_jars';
-        $result[$loc] = array();
-        $tips = $this->tokens->getTokensInLocation($loc);
-        for ($x = 0; $x < count($tips); $x++)
-        {
-            array_push($result[$loc], "tip_pos_$x");
+            // Setup element in array
+            $result['tokens'][$locValue] = array();
+            $result['tokens'][$locValue]['loc'] = $loc;
+            $result['tokens'][$locValue]['player_id'] = $idx;
+            $result['tokens'][$locValue]['items'] = array();
+            
+            $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc));
+            $locValue++;
         }
 
         return $result;
@@ -1050,13 +1067,13 @@ class chaisji extends Table
 
             // Take one item from the pantry stock and give it to the active player
             $token_update = $this->tokens->pickTokensForLocation(1, "pantry_stock", "player_$color");
+            $token_update[0]['state'] = 0;      // NEW ITEM
 
             // Notify all players of the change
             //$token = array('obj' => object, 'method' => method_name);
             self::notifyAllPlayers("tokenUpdate", clienttranslate('${player_name} selects an item from the pantry supply'), array(
                 'player_id' => $player_id,
                 'player_name' => self::getActivePlayerName(),
-                //'action_id' => $cmdId,
                 'token' => $token_update)
             );
         }
