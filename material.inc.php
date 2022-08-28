@@ -30,9 +30,9 @@ $this->ordered_flavors = array ('lemon', 'mint', 'berries', 'jasmine', 'lavender
 $this->abbr_flavors = array ('l'=>'lemon', 'm'=>'mint', 'b'=>'berries', 'j'=>'jasmine', 'd'=>'lavender', 'g'=>'ginger', 'w'=>'wild');
 
 // Ordered pantry                  0          1       2        3        4       5
-$this->ordered_pantry = array ('chai', 'vanilla', 'milk', 'sugar', 'honey', 'any_additive');
+$this->ordered_pantry = array ('chai', 'vanilla', 'milk', 'sugar', 'honey', 'awild');
 
-$this->abbr_pantry = array ('c'=>'chai', 'v'=>'vanilla', 'k'=>'milk', 's'=>'sugar', 'h'=>'honey', 'a'=>'any_additive');
+$this->abbr_pantry = array ('c'=>'chai', 'v'=>'vanilla', 'k'=>'milk', 's'=>'sugar', 'h'=>'honey', 'a'=>'awild');
 
 // These are the game locations in the database where we will send information in the getAllDatas function.
 // For these items the JS only needs to know about the key value
@@ -69,28 +69,28 @@ $this->token_types = array(
   'name' => clienttranslate("Wild flavor"),
 ),
 'chai' => array(
-  'type' => 'additive',
+  'type' => 'pantry',
   'name' => clienttranslate("Chai"),
 ),
 'vanilla' => array(
-  'type' => 'additive',
+  'type' => 'pantry',
   'name' => clienttranslate("Vanilla"),
 ),
 'milk' => array(
-  'type' => 'additive',
+  'type' => 'pantry',
   'name' => clienttranslate("Milk"),
 ),
 'sugar' => array(
-  'type' => 'additive',
+  'type' => 'pantry',
   'name' => clienttranslate("Sugar"),
 ),
 'honey' => array(
-  'type' => 'additive',
+  'type' => 'pantry',
   'name' => clienttranslate("Honey"),
 ),
-'any_additive' => array(
-  'type' => 'additive',
-  'name' => clienttranslate("Wild additive"),
+'awild' => array(
+  'type' => 'pantry',
+  'name' => clienttranslate("Wild pantry item"),
 ),
 'card_ability_0' => array(
   'type' => 'card',

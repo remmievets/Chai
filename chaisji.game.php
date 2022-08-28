@@ -723,10 +723,13 @@ class chaisji extends Table
         $sql = "SELECT player_id id, player_score score, player_color color FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
   
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
+        // Note: Gather all information about current game situation (visible by player $current_player_id).
         // Gather some general information first
         $result['ordered_flavors'] = $this->ordered_flavors;
+        $result['abbr_flavors'] = $this->abbr_flavors;
         $result['ordered_pantry'] = $this->ordered_pantry;
+        $result['abbr_pantry'] = $this->abbr_pantry;
+        $result['token_types'] = $this->token_types;
 
         // We want to send the data from the following locations to JS code
         //  faceup_ability -> 3 card abilities
@@ -835,11 +838,13 @@ class chaisji extends Table
         return 0;
     }
 
+    // Test function
     function dumpCurrentPlayer()
     {
         $this->dump('dumpCurrentPlayer', self::getCurrentPlayerId());
     }
 
+    // Test function
     function dumpActivePlayer()
     {
         $sql = "SELECT player_id id, player_no pno, player_score score, player_color color FROM player ";
@@ -874,10 +879,10 @@ class chaisji extends Table
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_2');
         $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_3');
 
-        // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 wild
+        // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 any_pantry
         foreach ( $this->ordered_pantry as $res ) 
         {
-            if (strcasecmp($res,'wild') != 0)
+            if (strcasecmp($res,'any_pantry') != 0)
             {
                 $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 10);
             }
@@ -906,7 +911,7 @@ class chaisji extends Table
         //  6 in deck
         //  Remaining are discarded
         // 7. Money (1 for first player and 2 for everyone else)
-        $money = 1;
+        //$money = 1;
         foreach ( $this->players_basic as $player_id => $player_info ) 
         {
             $color = $player_info ['player_color'];
@@ -919,9 +924,9 @@ class chaisji extends Table
             $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
             $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
             // 7.
-            $this->tokens->createTokensPack("money_$color", "player_$color");
-            $this->tokens->updateStateToken("money_$color", $money);
-            $money = 2;
+            //$this->tokens->createTokensPack("money_$color", "player_$color");
+            //$this->tokens->updateStateToken("money_$color", $money);
+            //$money = 2;
         }
         // 7. Now shuffle customer deck and deal 2 more to the plaza
         $this->tokens->shuffle('customer_deck');
@@ -933,16 +938,12 @@ class chaisji extends Table
 
     public function getNumPlayers() 
     {
-        if (! isset($this->players_basic)) {
+        if (! isset($this->players_basic)) 
+        {
             $this->players_basic = $this->loadPlayersBasicInfos();
         }
         return count($this->players_basic);
     }
-
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
-
 
 
 //////////////////////////////////////////////////////////////////////////////
@@ -952,10 +953,7 @@ class chaisji extends Table
     /*
         Each time a player is doing some game action, one of the methods below is called.
         (note: each method below must match an input method in chaisji.action.php)
-    */
 
-    /*
-    
     Example:
 
     function playCard( $card_id )
@@ -967,7 +965,6 @@ class chaisji extends Table
         
         // Add your game logic to play a card there 
         ...
-        
         // Notify all players about the card played
         self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
             'player_id' => $player_id,
@@ -975,12 +972,97 @@ class chaisji extends Table
             'card_name' => $card_name,
             'card_id' => $card_id
         ) );
-          
-    }
-    
     */
+    function st______PLAYER_ACTIONS___() 
+    {
+        return 0;
+    }
 
-    
+    // This item allows control of the game states via user action
+    // $stateId - is the button ID that was selected to get into this position
+    function action_gameStateChange( $stateId )
+    {
+        // TBD - check that action is legal
+        switch ($stateId)
+        {
+            case 'button_market_id':
+                $this->gamestate->nextState('market');
+                break;
+            case 'button_pantry_id':
+                $this->gamestate->nextState('pantry');
+                break;
+            case 'button_customer_id':
+                $this->gamestate->nextState('reserve');
+                break;
+            case 'button_advance_id':
+                $this->gamestate->nextState('advance');
+                break;
+            case 'button_next_id':
+                $this->gamestate->nextState('next');
+                break;
+            case 'button_undo_id':
+                $this->gamestate->nextState('loopback');
+                break;
+            default:
+                $this->gamestate->nextState('next');
+                break;
+        }
+        self::trace("Immer Passes");
+        $this->dump('main', $stateId);
+    }
+
+    // This handles pantry bag selection.  There are two possible actions: reset and bag.
+    //  'Reset' costs 1 money and resets all 5 pantry tokens
+    //  'Bag' selects one token from the bag.  This is one of the 3 that the user is allowed
+    function action_PantryBagSelection( $cmdId )
+    {
+        $player_id = self::getActivePlayerId();
+
+        // TBD - Check action is legal
+        if ($cmdId == 'button_resetpantry_id')
+        {
+            // TODO - subtract one money from player
+            // TODO - Don't allow going back once this is done
+            // TODO - Only allow once per player - cannot do once a tile is taken
+            // Move all tokens back to bag
+            $this->tokens->moveAllTokensInLocation('pantry_board', 'pantry_stock');
+
+            // Shuffle tiles from bag
+            $this->tokens->shuffle('pantry_stock');
+
+            // Pick 5 new items
+            $this->tokens->pickTokensForLocation(5, 'pantry_stock', 'pantry_board');
+
+            // Notify all players of the changes
+            $new_board = array();
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('pantry_board'));
+            self::notifyAllPlayers("pantryUpdate", clienttranslate('${player_name} reset pantry'), array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                'action_id' => $cmdId,
+                'pantry_board' => $new_board)
+            );
+        }
+        else if ($cmdId == 'button_bagpantry_id')
+        {
+            // TODO - Keep track of number of tiles taken
+            $color = $this->getPlayerColorById($player_id);
+
+            // Take one item from the pantry stock and give it to the active player
+            $token_update = $this->tokens->pickTokensForLocation(1, "pantry_stock", "player_$color");
+
+            // Notify all players of the change
+            //$token = array('obj' => object, 'method' => method_name);
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('${player_name} selects an item from the pantry supply'), array(
+                'player_id' => $player_id,
+                'player_name' => self::getActivePlayerName(),
+                //'action_id' => $cmdId,
+                'token' => $token_update)
+            );
+        }
+    }
+
+
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
 ////////////
@@ -1025,13 +1107,6 @@ class chaisji extends Table
         return 0;
     }
 
-    //////////// --- Game state actions generated begin ---
-    function action_playerPass()
-    {
-        self::trace("Immer Passes");
-        $this->gamestate->nextState('next');
-    }
-
     function st_gameTurnNextPlayer() 
     {
         // Set active player to the next person in turn order
@@ -1067,25 +1142,18 @@ class chaisji extends Table
         As a consequence, there is no current player associated to this action. In your zombieTurn function,
         you must _never_ use getCurrentPlayerId() or getCurrentPlayerName(), otherwise it will fail with a "Not logged" error message. 
     */
-
     function zombieTurn( $state, $active_player )
     {
         $statename = $state['name'];
         
-        if ($state['type'] === "activeplayer") {
+        if ($state['type'] === "activeplayer") 
+        {
             switch ($statename) {
                 default:
-                    $this->gamestate->nextState( "zombiePass" );
+                    $this->gamestate->nextState( "next" );
                     break;
             }
 
-            return;
-        }
-
-        if ($state['type'] === "multipleactiveplayer") {
-            // Make sure player is in a non blocking status for role turn
-            $this->gamestate->setPlayerNonMultiactive( $active_player, '' );
-            
             return;
         }
 

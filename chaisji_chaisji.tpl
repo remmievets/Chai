@@ -1,5 +1,6 @@
 {OVERALL_GAME_HEADER}
 
+<div id="gameboard">
 <div id="mboard_space" class="anchor">
 	<div id="market_area" class="board_area">
 		<h3>Market</h3> 
@@ -67,22 +68,23 @@
 		<!-- player panel -->
 		<div id="playerpanel_{COLOR}" class="playerpanel">
 			<div>
-				<div id="counter_lemon_{COLOR}" class="counter ppflavor flavor_lemon textoverlay">2</div>
-				<div id="counter_mint_{COLOR}" class="counter ppflavor flavor_mint textoverlay">2</div>
-				<div id="counter_berries_{COLOR}" class="counter ppflavor flavor_berries textoverlay">2</div>
-				<div id="counter_jasmine_{COLOR}" class="counter ppflavor flavor_jasmine textoverlay">2</div>
-				<div id="counter_lavender_{COLOR}" class="counter ppflavor flavor_lavender textoverlay">2</div>
-				<div id="counter_ginger_{COLOR}" class="counter ppflavor flavor_ginger textoverlay">2</div>
-				<div id="counter_wild_{COLOR}" class="counter ppflavor flavor_wild textoverlay">2</div>
-				<div id="counter_chai_{COLOR}" class="counter ppadditive additive_chai textoverlay">2</div>
-				<div id="counter_vanilla_{COLOR}" class="counter ppadditive additive_vanilla textoverlay">2</div>
-				<div id="counter_milk_{COLOR}" class="counter ppadditive additive_milk textoverlay">2</div>
-				<div id="counter_sugar_{COLOR}" class="counter ppadditive additive_sugar textoverlay">2</div>
-				<div id="counter_honey_{COLOR}" class="counter ppadditive additive_honey textoverlay">2</div>
-				<div id="counter_awild_{COLOR}" class="counter ppadditive additive_wild textoverlay">2</div>
+				<div id="counter_lemon_{COLOR}" class="counter ppflavor flavor_lemon textoverlay">0</div>
+				<div id="counter_mint_{COLOR}" class="counter ppflavor flavor_mint textoverlay">0</div>
+				<div id="counter_berries_{COLOR}" class="counter ppflavor flavor_berries textoverlay">0</div>
+				<div id="counter_jasmine_{COLOR}" class="counter ppflavor flavor_jasmine textoverlay">0</div>
+				<div id="counter_lavender_{COLOR}" class="counter ppflavor flavor_lavender textoverlay">0</div>
+				<div id="counter_ginger_{COLOR}" class="counter ppflavor flavor_ginger textoverlay">0</div>
+				<div id="counter_wild_{COLOR}" class="counter ppflavor flavor_wild textoverlay">0</div>
+				<div id="counter_chai_{COLOR}" class="counter ppadditive additive_chai textoverlay">0</div>
+				<div id="counter_vanilla_{COLOR}" class="counter ppadditive additive_vanilla textoverlay">0</div>
+				<div id="counter_milk_{COLOR}" class="counter ppadditive additive_milk textoverlay">0</div>
+				<div id="counter_sugar_{COLOR}" class="counter ppadditive additive_sugar textoverlay">0</div>
+				<div id="counter_honey_{COLOR}" class="counter ppadditive additive_honey textoverlay">0</div>
+				<div id="counter_awild_{COLOR}" class="counter ppadditive additive_awild textoverlay">0</div>
 			</div>
 		</div>
 	<!-- END player_board -->
+</div>
 </div>
 
 <script type="text/javascript">

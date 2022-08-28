@@ -40,18 +40,20 @@
     } 
     
     // Action from JS - play market
-    public function playMarket() 
+    public function playStateChange() 
     {
       self::setAjaxMode();
-      $this->game->action_playerPass();
+      $main = self::getArg('main', AT_alphanum, true);
+      $this->game->action_gameStateChange($main);
       self::ajaxResponse();
     }
 
-    // Action from JS - play pantry
-    public function playPantry() 
+    // Action from JS - play pantry action from the bag
+    public function playBagPantry() 
     {
       self::setAjaxMode();
-      $this->game->action_playerPass();
+      $main = self::getArg('main', AT_alphanum, true);
+      $this->game->action_PantryBagSelection($main);
       self::ajaxResponse();
     }
 
