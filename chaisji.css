@@ -137,11 +137,11 @@
     height: 90px;
     position: absolute;
 }
-#spot_0 { left: 100px; top:  80px; }
-#spot_1 { left: 203px; top:  87px; }
-#spot_2 { left: 237px; top: 183px; }
-#spot_3 { left: 152px; top: 242px; }
-#spot_4 { left:  72px; top: 180px; }
+#spot_1 { left: 100px; top:  80px; }
+#spot_2 { left: 203px; top:  87px; }
+#spot_3 { left: 237px; top: 183px; }
+#spot_4 { left: 152px; top: 242px; }
+#spot_5 { left:  72px; top: 180px; }
 
 .additive {
     width: 90px;

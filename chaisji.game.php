@@ -734,7 +734,7 @@ class chaisji extends Table
         // We want to send the data from the following locations to JS code
         //  faceup_ability -> 3 card abilities
         //  market_1 - market_3 -> market rows
-        //  pantry_board -> 5 items for pantry board
+        //  spot_1-5 -> 5 items for pantry board
         //  plaza -> cards available in plaza
         //  tip_jars -> the available tip jars this round
         //  player_$color -> information for player boards and cards (second loop below)
@@ -749,7 +749,7 @@ class chaisji extends Table
             $result['tokens'][$locValue]['loc'] = $loc;
             $result['tokens'][$locValue]['items'] = array();
 
-            if ($loc == 'tip_jars')
+            if ($loc == 'tip_area')
             {
                 // for tip jars the items are hidden
                 $tips = $this->tokens->getTokensInLocation($loc);
@@ -909,17 +909,21 @@ class chaisji extends Table
             }
         }
         $this->tokens->shuffle('pantry_stock');
-        $this->tokens->pickTokensForLocation(5, 'pantry_stock', 'pantry_board');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_1');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_2');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_3');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_4');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_5');
 
         // 3. Tip tokens.  6, deal one per player
         $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
         $this->tokens->shuffle('tip_stock');
-        $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_jars');
+        $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_area');
 
         // 4. Ability cards.  8 total in game, deal 3
         $this->tokens->createTokensPack('card_ability_{INDEX}', "ability_deck", 8);
         $this->tokens->shuffle('ability_deck');
-        $this->tokens->pickTokensForLocation(3, 'ability_deck', 'faceup_ability');
+        $this->tokens->pickTokensForLocation(3, 'ability_deck', 'ability_area');
 
         // 5. Tea tokens. 6 per player
         // 6. Customer cards. 11 per player
@@ -937,7 +941,7 @@ class chaisji extends Table
             // 6.
             $this->tokens->createTokensPack("customer_{INDEX}_$color", "player_deck_$color", 11);
             $this->tokens->shuffle("player_deck_$color");
-            $this->tokens->pickTokensForLocation(1, "player_deck_$color", 'plaza');
+            $this->tokens->pickTokensForLocation(1, "player_deck_$color", 'pantry_area');
             $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
             $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
             // 7.
@@ -947,7 +951,7 @@ class chaisji extends Table
         }
         // 7. Now shuffle customer deck and deal 2 more to the plaza
         $this->tokens->shuffle('customer_deck');
-        $this->tokens->pickTokensForLocation(2, 'customer_deck', 'plaza');
+        $this->tokens->pickTokensForLocation(2, 'customer_deck', 'plaza_area');
 
         // Commit globals
         $this->tokens->commitGlobalIndex('ROUND');
@@ -1042,17 +1046,29 @@ class chaisji extends Table
             // TODO - Don't allow going back once this is done
             // TODO - Only allow once per player - cannot do once a tile is taken
             // Move all tokens back to bag
-            $this->tokens->moveAllTokensInLocation('pantry_board', 'pantry_stock');
+            $this->tokens->moveAllTokensInLocation('spot_1', 'pantry_stock');
+            $this->tokens->moveAllTokensInLocation('spot_2', 'pantry_stock');
+            $this->tokens->moveAllTokensInLocation('spot_3', 'pantry_stock');
+            $this->tokens->moveAllTokensInLocation('spot_4', 'pantry_stock');
+            $this->tokens->moveAllTokensInLocation('spot_5', 'pantry_stock');
 
             // Shuffle tiles from bag
             $this->tokens->shuffle('pantry_stock');
 
             // Pick 5 new items
-            $this->tokens->pickTokensForLocation(5, 'pantry_stock', 'pantry_board');
-
+            $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_1');
+            $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_2');
+            $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_3');
+            $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_4');
+            $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_5');
+    
             // Notify all players of the changes
             $new_board = array();
-            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('pantry_board'));
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('spot_1'));
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('spot_2'));
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('spot_3'));
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('spot_4'));
+            $this->fillArrayItems($new_board, $this->tokens->getTokensInLocation('spot_5'));
             self::notifyAllPlayers("pantryUpdate", clienttranslate('${player_name} reset pantry'), array(
                 'player_id' => $player_id,
                 'player_name' => self::getActivePlayerName(),

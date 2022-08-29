@@ -36,7 +36,7 @@ $this->abbr_pantry = array ('c'=>'chai', 'v'=>'vanilla', 'k'=>'milk', 's'=>'suga
 
 // These are the game locations in the database where we will send information in the getAllDatas function.
 // For these items the JS only needs to know about the key value
-$this->gameDataLocs = array('faceup_ability', 'market_1', 'market_2', 'market_3', 'plaza', 'pantry_board', 'tip_jars');
+$this->gameDataLocs = array('ability_area', 'market_1', 'market_2', 'market_3', 'spot_1', 'spot_2', 'spot_3', 'spot_4', 'spot_5', 'plaza_area', 'tip_area');
 
 $this->token_types = array(
         /* --- gen php begin --- */

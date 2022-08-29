@@ -17,8 +17,6 @@
 	<div id="pantry_area" class="board_area">
 		<h3>Pantry</h3>
 		<div id="pantry_board" class="shadow">
-			<div id="spot_0" class="spot">
-			</div>
 			<div id="spot_1" class="spot">
 			</div>
 			<div id="spot_2" class="spot">
@@ -26,6 +24,8 @@
 			<div id="spot_3" class="spot">
 			</div>
 			<div id="spot_4" class="spot">
+			</div>
+			<div id="spot_5" class="spot">
 			</div>
 		</div>
 	</div>
