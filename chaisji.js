@@ -10,7 +10,7 @@
  * chaisji.js
  *
  * chaisji user interface script
- * 
+ *
  * In this file, you are describing the logic of your user interface, in Javascript language.
  *
  */
@@ -26,7 +26,7 @@ function (dojo, declare) {
         constructor: function()
         {
             console.log('chaisji constructor');
-              
+
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
@@ -42,17 +42,17 @@ function (dojo, declare) {
             this.marketLocations = ['market_1', 'market_2', 'market_3'];
             this.pantryLocations = ['spot_1', 'spot_2', 'spot_3', 'spot_4', 'spot_5'];
         },
-        
+
         /*
             setup:
-            
+
             This method must set up the game user interface according to current game situation specified
             in parameters.
-            
+
             The method is called each time the game interface is displayed to a player, ie:
             _ when the game starts
             _ when a player refreshes the game page (F5)
-            
+
             "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         */
         setup: function( gamedatas )
@@ -60,13 +60,13 @@ function (dojo, declare) {
             console.log("Starting game setup");
             console.log(gamedatas);
             this.inSetupMode = true;
-            try 
+            try
             {
                 // Setting up player boards
                 for(let player_id in gamedatas.players)
                 {
                     let color = gamedatas.players[player_id].color;
-                         
+
                     // Setting up players boards if needed
                     let playerBoardDiv = dojo.byId('player_board_' + player_id);
                     dojo.place('playerpanel_' + color, playerBoardDiv);
@@ -100,13 +100,11 @@ function (dojo, declare) {
                         this.placeToken(t, token_info['player_id'], token_info['loc'], true);
                     }
                 }
-            
+
                 // Setup game notifications to handle (see "setupNotifications" method below)
                 this.setupNotifications();
-
-                //this.addEventToClass("additive", "onclick", "onAdditive");
             }
-            catch (e) 
+            catch (e)
             {
                 console.error("Exception thrown", e.stack);
                 this.showMessage("Setup Error: Please raise a bug" + "\n" + e, "error");
@@ -114,32 +112,40 @@ function (dojo, declare) {
             this.inSetupMode = false;
             console.log( "Ending game setup" );
         },
-       
+
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         //// Game & client states
-        
-        // onEnteringState: 
+
+        // onEnteringState:
         // This method is called each time we are entering into a new game state.
         // You can use this method to perform some user interface changes at this moment.
         //
         onEnteringState: function( stateName, args )
         {
             console.log('Entering state: '+stateName);
-            
+
             switch( stateName )
             {
+            case 'playerMarketAction':
+                console.dir(dojo.query('#market_area > flavor'));
+                break;
+
             case 'playerPantryAction':
                 // Activate all of the pantry items and make them selectable
+                ////TODO - best to make this a function to keep active items selectable
+                console.dir(dojo.query('#pantry_board > additive'));
+
+                this.connectClass("additive", "onclick", "onAdditive");
                 break;
-           
+
             default:
                 break;
             }
         },
 
-        // onLeavingState: 
+        // onLeavingState:
         // This method is called each time we are leaving a game state.
         //  You can use this method to perform some user interface changes at this moment.
         //
@@ -149,61 +155,61 @@ function (dojo, declare) {
             {
             case 'dummmy':
                 break;
-            }               
-        }, 
+            }
+        },
 
-        // onUpdateActionButtons: 
+        // onUpdateActionButtons:
         // In this method you can manage "action buttons" that are displayed in the
         // action status bar (ie: the HTML links in the status bar).
-        //        
+        //
         onUpdateActionButtons: function( stateName, args )
         {
             console.log('onUpdateActionButtons: '+stateName);
-                      
+
             if( this.isCurrentPlayerActive() )
-            {            
+            {
                 switch( stateName )
                 {
                 case 'playerTurnAction':
                     // Add 3 action buttons in the action status bar:
-                    this.addActionButton( 'button_market_id', _('Visit Market'), 'onMyButtonToCall' ); 
-                    this.addActionButton( 'button_pantry_id', _('Visit Pantry'), 'onMyButtonToCall' ); 
-                    this.addActionButton( 'button_customer_id', _('Reserve Customer and use Ability'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_market_id', _('Visit Market'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_pantry_id', _('Visit Pantry'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_customer_id', _('Reserve Customer and use Ability'), 'onMyButtonToCall' );
                     break;
 
                 case 'playerMarketAction':
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' ); 
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
                     break;
 
                 case 'playerPantryAction':
-                    this.addActionButton( 'button_resetpantry_id', _('Reset pantry for 1 coin'), 'onPantryButton' ); 
-                    this.addActionButton( 'button_bagpantry_id', _('Pull one pantry token from bag'), 'onPantryButton' ); 
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' ); 
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_resetpantry_id', _('Reset pantry for 1 coin'), 'onPantryButton' );
+                    this.addActionButton( 'button_bagpantry_id', _('Pull one pantry token from bag'), 'onPantryButton' );
+                    this.addActionButton( 'button_select_pantry_id', _('Select Tiles'), 'onSelectPantryItems' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
                     break;
 
                 case 'playerReserveAction':
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' ); 
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
                     break;
 
                 case 'playerFulfillOrder':
-                    this.addActionButton( 'button_next_id', _('End Turn'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_next_id', _('End Turn'), 'onMyButtonToCall' );
                     break;
-                
+
                 case 'playerNextRound':
-                    this.addActionButton( 'button_next_id', _('Done'), 'onMyButtonToCall' ); 
+                    this.addActionButton( 'button_next_id', _('Done'), 'onMyButtonToCall' );
                     break;
                 }
             }
-        },        
+        },
 
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         //// Utility methods
-        
+
         // Get the translated string from a string in English
         // @return string
         getTr : function( name )
@@ -223,7 +229,7 @@ function (dojo, declare) {
         // Get the first part of a token - this is the identifying type of token
         // For example customer_1_FFFFFFFF is converted to customer
         // @returns string
-        getTokenMainType : function( token ) 
+        getTokenMainType : function( token )
         {
             let tt = token.split('_');
             let tokenType = tt[0];
@@ -232,7 +238,7 @@ function (dojo, declare) {
 
         // Get the last part of a token.  There are 3 parts <type>_<uniqueId>_<subtype>.
         // @returns string
-        getTokenSubType : function( token ) 
+        getTokenSubType : function( token )
         {
             let tt = token.split('_');
             let tokenType = tt[2];
@@ -241,7 +247,7 @@ function (dojo, declare) {
 
         // Most items are 3 parts <type>_<uniqueid>_<subtype>.  This removes the unique id
         // @returns string
-        getGenericType : function( token ) 
+        getGenericType : function( token )
         {
             let tt = token.split('_');
             let tokenGeneric = tt[0] + '_' + tt[2];
@@ -251,7 +257,7 @@ function (dojo, declare) {
         // Get the CSS additive string from an additive "pantry_#_$add" (token name)
         //  Convert "pantry_#_$add" to "additive_$add"
         // @returns string
-        getAdditiveIdentifer : function( token ) 
+        getAdditiveIdentifer : function( token )
         {
             let selectedItem = 'additive_honey';
             for (let i=0; i<this.gamedatas.ordered_pantry.length; i++)
@@ -291,11 +297,11 @@ function (dojo, declare) {
 
         // Create a div object from a token name
         // @returns tokenDiv object
-        createToken : function( token ) 
+        createToken : function( token )
         {
             let tokenMainType = this.getTokenMainType(token);
             let tokenClasses = '';
-            switch (tokenMainType) 
+            switch (tokenMainType)
             {
                 case 'card':
                     tokenClasses = 'shadow abilitycard ' + token;
@@ -318,7 +324,7 @@ function (dojo, declare) {
                 default:
                     break;
             }
-            let tokenDiv = this.format_block('jstpl_token', 
+            let tokenDiv = this.format_block('jstpl_token',
                 {
                     "id" : token,
                     "classes" : tokenClasses,
@@ -347,7 +353,7 @@ function (dojo, declare) {
                 if (typeof this.counters[player_id][tokenItem] != 'undefined')
                 {
                     this.counters[player_id][tokenItem].decValue(1);
-                }        
+                }
             }
         },
 
@@ -365,7 +371,7 @@ function (dojo, declare) {
             let tokenDiv = $(token);
 
             // If location is "destroy" then just get rid of the item
-            if (location == "destroy") 
+            if (location == "destroy")
             {
                 // Verify this item is on the board already
                 if (tokenDiv.parentNode != null)
@@ -382,7 +388,7 @@ function (dojo, declare) {
             }
 
             // Determine if this item is new then create DIV
-            if (tokenDiv == null) 
+            if (tokenDiv == null)
             {
                 tokenDiv = this.createToken(token);
             }
@@ -428,7 +434,7 @@ function (dojo, declare) {
             }
 
             // Add tool tip if defined for this item
-            if (typeof this.gamedatas.token_types[token] != 'undefined') 
+            if (typeof this.gamedatas.token_types[token] != 'undefined')
             {
                 this.addTooltip(token, this.gamedatas.token_types[token].tooltip, _(''), 1000);
             }
@@ -464,16 +470,16 @@ function (dojo, declare) {
         },
 
         // More convenient version of ajaxcall, do not to specify game name, and any of the handlers
-        ajaxAction : function( action, args ) 
+        ajaxAction : function( action, args )
         {
             console.log("ajax action " + action);
-            if (!args) 
+            if (!args)
             {
                 args = [];
             }
             args.lock = true;
 
-            if (this.checkAction(action)) 
+            if (this.checkAction(action))
             {
                 this.ajaxcall("/" + this.game_name + "/" + this.game_name + "/" + action + ".html", args, this, function( result ) {}, function( is_error ) {});
             }
@@ -491,10 +497,10 @@ function (dojo, declare) {
             this.original_id = id;
             dojo.stopEvent(event);
             // Pass event information to server
-            this.ajaxAction("playStateChange",  {main : id});
+            this.ajaxAction("playStateChange", {main : id});
         },
 
-        onFlavor : function( event ) 
+        onFlavor : function( event )
         {
             console.log('onFlavor');
             this.ajaxAction("playAbility", {});
@@ -523,12 +529,38 @@ function (dojo, declare) {
             // This action covers the pull one tile from bag and pull new tiles for 1 coin cases
             let id = event.currentTarget.id;
             dojo.stopEvent(event);
-            this.ajaxAction("playBagPantry",  {main : id});
+            this.ajaxAction("playBagPantry", {main : id});
         },
 
-        onAdditive : function( event ) 
+        onSelectPantryItems : function ( event )
+        {
+            // Send all selected items
+            let id = event.currentTarget.id;
+            dojo.stopEvent(event);
+
+            // Build list of selected items to send
+            let gameArgs = '';
+            let selection = dojo.query('.selected_slot');
+            for (let item of selection)
+            {
+                gameArgs += item.id + ' ';
+            }
+
+            // TODO - remove selected_slot from all items
+
+            this.ajaxAction("playSelection", {main : id, selection : gameArgs});
+        },
+
+        onAdditive : function( event )
         {
             console.log('onAdditive');
+            console.log(event.target.id);
+            //let lookup = dojo.query('#' + event.target.id);
+            //console.log(lookup[0]);
+            //console.log(lookup.length);
+            dojo.toggleClass(event.target.id, 'selected_slot');
+
+
             //this.ajaxAction("playAbility", {});
             /*
             var items = this.flavorRow1.getSelectedItems();
@@ -549,39 +581,40 @@ function (dojo, declare) {
             }
             */
         },
-        
+
         ///////////////////////////////////////////////////
         //// Reaction to cometD notifications
 
         /*
             setupNotifications:
-            
+
             In this method, you associate each of your game notifications with your local method to handle it.
-            
+
             Note: game notification names correspond to "notifyAllPlayers" and "notifyPlayer" calls in
                   your chaisji.game.php file.
-        
+
             // Example 1: standard notification handling
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
-            
+
             // Example 2: standard notification handling + tell the user interface to wait
             //            during 3 seconds after calling the method in order to let the players
             //            see what is happening in the game.
             // dojo.subscribe( 'cardPlayed', this, "notif_cardPlayed" );
             // this.notifqueue.setSynchronous( 'cardPlayed', 3000 );
-            // 
+            //
         */
         setupNotifications: function()
         {
             console.log( 'notifications subscriptions setup' );
-            
+
             // here, associate your game notifications with local methods
             dojo.subscribe('pantryUpdate', this, 'notif_pantryUpdate');
             dojo.subscribe('tokenUpdate', this, 'notif_tokenUpdate');
-        },  
-        
+            dojo.subscribe('msgUpdate', this, 'notif_msgUpdate');
+        },
+
         // from this point and below, you can write your game notifications handling methods
-        
+
         notif_pantryUpdate: function( notif )
         {
             console.log('notif_pantryUpdate');
@@ -608,14 +641,15 @@ function (dojo, declare) {
 
             let player_id = notif.args.player_id;
 
-            console.log(notif.args.player_id);
             for (let tokenInfo of notif.args.token)
             {
-                let token = notif.args.token[0].key;
-                let loc = notif.args.token[0].location
-
-                this.placeToken(token, player_id, loc, false);
+                this.placeToken(tokenInfo.key, player_id, tokenInfo.location, false);
             }
         },
-   });             
+
+        notif_msgUpdate: function( notif )
+        {
+            console.log('notif_msgUpdate');
+        },
+   });
 });

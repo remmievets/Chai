@@ -63,7 +63,8 @@
     box-shadow: 0px 0px 4px 2px #03afbd !important
 }
 
-.active_slot:hover {
+.selected_slot {
+    cursor: pointer;
     box-shadow: 0px 0px 1px 5px darkblue !important;
 }
 
