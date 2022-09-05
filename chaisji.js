@@ -32,9 +32,6 @@ function (dojo, declare) {
             // this.myGlobalValue = 0;
             this.inSetupMode = true;
 
-            // Array of current dojo connections (needed for method addEventToClass)
-            this.connections = [];
-
             // Array for counters
             this.counters = [];
 
@@ -43,18 +40,16 @@ function (dojo, declare) {
             this.pantryLocations = ['spot_1', 'spot_2', 'spot_3', 'spot_4', 'spot_5'];
         },
 
-        /*
-            setup:
-
-            This method must set up the game user interface according to current game situation specified
-            in parameters.
-
-            The method is called each time the game interface is displayed to a player, ie:
-            _ when the game starts
-            _ when a player refreshes the game page (F5)
-
-            "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
-        */
+        /// setup:
+        ///
+        /// This method must set up the game user interface according to current game situation specified
+        /// in parameters.
+        ///
+        /// The method is called each time the game interface is displayed to a player, ie:
+        ///    _ when the game starts
+        ///    _ when a player refreshes the game page (F5)
+        ///
+        /// "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         setup: function( gamedatas )
         {
             console.log("Starting game setup");
@@ -118,10 +113,10 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Game & client states
 
-        // onEnteringState:
-        // This method is called each time we are entering into a new game state.
-        // You can use this method to perform some user interface changes at this moment.
-        //
+        /// onEnteringState:
+        /// This method is called each time we are entering into a new game state.
+        /// You can use this method to perform some user interface changes at this moment.
+        ///
         onEnteringState: function( stateName, args )
         {
             console.log('Entering state: '+stateName);
@@ -137,7 +132,6 @@ function (dojo, declare) {
                 ////TODO - best to make this a function to keep active items selectable
                 console.dir(dojo.query('#pantry_board > additive'));
 
-                this.connectClass("additive", "onclick", "onAdditive");
                 break;
 
             default:
@@ -145,10 +139,10 @@ function (dojo, declare) {
             }
         },
 
-        // onLeavingState:
-        // This method is called each time we are leaving a game state.
-        //  You can use this method to perform some user interface changes at this moment.
-        //
+        /// onLeavingState:
+        /// This method is called each time we are leaving a game state.
+        ///  You can use this method to perform some user interface changes at this moment.
+        ///
         onLeavingState: function( stateName )
         {
             switch( stateName )
@@ -158,10 +152,10 @@ function (dojo, declare) {
             }
         },
 
-        // onUpdateActionButtons:
-        // In this method you can manage "action buttons" that are displayed in the
-        // action status bar (ie: the HTML links in the status bar).
-        //
+        /// onUpdateActionButtons:
+        /// In this method you can manage "action buttons" that are displayed in the
+        /// action status bar (ie: the HTML links in the status bar).
+        ///
         onUpdateActionButtons: function( stateName, args )
         {
             console.log('onUpdateActionButtons: '+stateName);
@@ -172,34 +166,35 @@ function (dojo, declare) {
                 {
                 case 'playerTurnAction':
                     // Add 3 action buttons in the action status bar:
-                    this.addActionButton( 'button_market_id', _('Visit Market'), 'onMyButtonToCall' );
-                    this.addActionButton( 'button_pantry_id', _('Visit Pantry'), 'onMyButtonToCall' );
-                    this.addActionButton( 'button_customer_id', _('Reserve Customer and use Ability'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_market_id', _('Visit Market'), 'onStateChange' );
+                    this.addActionButton( 'button_pantry_id', _('Visit Pantry'), 'onStateChange' );
+                    this.addActionButton( 'button_customer_id', _('Reserve Customer and use Ability'), 'onStateChange' );
                     break;
 
                 case 'playerMarketAction':
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' );
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
 
                 case 'playerPantryAction':
                     this.addActionButton( 'button_resetpantry_id', _('Reset pantry for 1 coin'), 'onPantryButton' );
                     this.addActionButton( 'button_bagpantry_id', _('Pull one pantry token from bag'), 'onPantryButton' );
-                    this.addActionButton( 'button_select_pantry_id', _('Select Tiles'), 'onSelectPantryItems' );
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_select_pantry_id', _('Select Tiles'), 'onSelectItems' );
+                    this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
 
                 case 'playerReserveAction':
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onMyButtonToCall' );
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
+                    this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
 
                 case 'playerFulfillOrder':
-                    this.addActionButton( 'button_next_id', _('End Turn'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_next_id', _('End Turn'), 'onStateChange' );
                     break;
 
                 case 'playerNextRound':
-                    this.addActionButton( 'button_next_id', _('Done'), 'onMyButtonToCall' );
+                    this.addActionButton( 'button_next_id', _('Done'), 'onStateChange' );
                     break;
                 }
             }
@@ -210,8 +205,8 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Utility methods
 
-        // Get the translated string from a string in English
-        // @return string
+        /// Get the translated string from a string in English
+        /// @return string
         getTr : function( name )
         {
             // Check for errors
@@ -226,9 +221,9 @@ function (dojo, declare) {
             return name;
         },
 
-        // Get the first part of a token - this is the identifying type of token
-        // For example customer_1_FFFFFFFF is converted to customer
-        // @returns string
+        /// Get the first part of a token - this is the identifying type of token
+        /// For example customer_1_FFFFFFFF is converted to customer
+        /// @returns string
         getTokenMainType : function( token )
         {
             let tt = token.split('_');
@@ -236,8 +231,8 @@ function (dojo, declare) {
             return tokenType;
         },
 
-        // Get the last part of a token.  There are 3 parts <type>_<uniqueId>_<subtype>.
-        // @returns string
+        /// Get the last part of a token.  There are 3 parts <type>_<uniqueId>_<subtype>.
+        /// @returns string
         getTokenSubType : function( token )
         {
             let tt = token.split('_');
@@ -245,8 +240,8 @@ function (dojo, declare) {
             return tokenType;
         },
 
-        // Most items are 3 parts <type>_<uniqueid>_<subtype>.  This removes the unique id
-        // @returns string
+        /// Most items are 3 parts <type>_<uniqueid>_<subtype>.  This removes the unique id
+        /// @returns string
         getGenericType : function( token )
         {
             let tt = token.split('_');
@@ -254,9 +249,9 @@ function (dojo, declare) {
             return tokenGeneric;
         },
 
-        // Get the CSS additive string from an additive "pantry_#_$add" (token name)
-        //  Convert "pantry_#_$add" to "additive_$add"
-        // @returns string
+        /// Get the CSS additive string from an additive "pantry_#_$add" (token name)
+        ///  Convert "pantry_#_$add" to "additive_$add"
+        /// @returns string
         getAdditiveIdentifer : function( token )
         {
             let selectedItem = 'additive_honey';
@@ -270,11 +265,11 @@ function (dojo, declare) {
             return selectedItem;
         },
 
-        // Get the list of tokens from a location key
-        // @returns associative array from this.gamesdata.tokens
-        //      Elements have loc, items, player_id keys
-        //  if not found then return null
-        //  This may be passed the parent Node - if that happens then we need to check for players locations
+        /// Get the list of tokens from a location key
+        /// @returns associative array from this.gamesdata.tokens
+        ///      Elements have loc, items, player_id keys
+        ///  if not found then return null
+        ///  This may be passed the parent Node - if that happens then we need to check for players locations
         getTokenListByLocation : function( location )
         {
             // Convert pflavor_{COLOR}, padditives_{COLOR}, ptea_{COLOR} to player_{COLOR}
@@ -295,8 +290,8 @@ function (dojo, declare) {
             return null;
         },
 
-        // Create a div object from a token name
-        // @returns tokenDiv object
+        /// Create a div object from a token name
+        /// @returns tokenDiv object
         createToken : function( token )
         {
             let tokenMainType = this.getTokenMainType(token);
@@ -332,7 +327,7 @@ function (dojo, declare) {
             return tokenDiv;
         },
 
-        // Remove item - update gamedata and counters
+        /// Remove item - update gamedata and counters
         removeTokenFromGameData : function( token, location )
         {
             // Get current location by parent node
@@ -357,13 +352,13 @@ function (dojo, declare) {
             }
         },
 
-        // Place a token on the board
-        //      Looks up the current location of token and if it is not on the board then a new token is created
-        //      Then place token on board in new location, if there was an old location it moves from that location to new location
-        //      If location is "destroy" then get rid of token
-        // Set noAnimation to false if you do not want the token to be animated during its creation (todo - not currently implemented)
-        //
-        // Adds tool tip information based on this.gamedatas.token_types[t].tooltip
+        /// Place a token on the board
+        ///      Looks up the current location of token and if it is not on the board then a new token is created
+        ///      Then place token on board in new location, if there was an old location it moves from that location to new location
+        ///      If location is "destroy" then get rid of token
+        /// Set noAnimation to false if you do not want the token to be animated during its creation (todo - not currently implemented)
+        ///
+        /// Adds tool tip information based on this.gamedatas.token_types[t].tooltip
         placeToken : function( token, player_id, location, noAnimation )
         {
             ////@TODO - need to perform animation part of this function
@@ -425,6 +420,14 @@ function (dojo, declare) {
                 dojo.place(tokenDiv, location);
             }
 
+            // Make token selectable
+            //handle = dojo.connect(dojo.byId(token), "onClick", this.onUserClickItem);
+            //console.log(handle);
+            //this.connect(tokenDiv, 'onClick', 'onUserClickItem');
+            //let handle = dojo.connect(dojo.byId(token), 'onClick', this.onUserClickItem);
+            //let handle1 = dojo.connect(dojo.byId(token), 'onClick', this.onUserClickItem);
+            let handle2 = dojo.connect(dojo.byId(token), 'click', this.onUserClickItem);
+
             // Update gamedata if not in setup
             if (this.inSetupMode == false)
             {
@@ -440,11 +443,11 @@ function (dojo, declare) {
             }
         },
 
-        // Place a token onto a player board - based on player color.
-        //      flavors goto - pflavor_{COLOR} (max 12)
-        //      additives goto - padditives_{COLOR} (max 6)
-        //      teas goto - ptea_{COLOR}
-        //      customers goto - pcards_{COLOR}
+        /// Place a token onto a player board - based on player color.
+        ///      flavors goto - pflavor_{COLOR} (max 12)
+        ///      additives goto - padditives_{COLOR} (max 6)
+        ///      teas goto - ptea_{COLOR}
+        ///      customers goto - pcards_{COLOR}
         placeTokenOnPlayerBoard : function( token, tokenDiv, playerColor )
         {
             let tokenMainType = this.getTokenMainType(token);
@@ -469,7 +472,7 @@ function (dojo, declare) {
             dojo.place(tokenDiv, locationBase);
         },
 
-        // More convenient version of ajaxcall, do not to specify game name, and any of the handlers
+        /// More convenient version of ajaxcall, do not to specify game name, and any of the handlers
         ajaxAction : function( action, args )
         {
             console.log("ajax action " + action);
@@ -490,8 +493,8 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         //// Player's action
 
-        // Handle main button presses
-        onMyButtonToCall: function( event )
+        /// @brief Send state change request to server
+        onStateChange: function( event )
         {
             let id = event.currentTarget.id;
             this.original_id = id;
@@ -500,30 +503,7 @@ function (dojo, declare) {
             this.ajaxAction("playStateChange", {main : id});
         },
 
-        onFlavor : function( event )
-        {
-            console.log('onFlavor');
-            this.ajaxAction("playAbility", {});
-            /*
-            var items = this.flavorRow1.getSelectedItems();
-
-            if (items.length > 0) {
-                if (this.checkAction('playCard', true)) {
-                    // Can play a card
-
-                    var card_id = items[0].id;
-                    console.log("on playCard "+card_id);
-
-                    this.flavorRow1.unselectAll();
-                } else if (this.checkAction('giveCards')) {
-                    // Can give cards => let the player select some cards
-                } else {
-                    this.flavorRow1.unselectAll();
-                }
-            }
-            */
-        },
-
+        /// @brief Handle pantry special action
         onPantryButton : function ( event )
         {
             // This action covers the pull one tile from bag and pull new tiles for 1 coin cases
@@ -532,7 +512,8 @@ function (dojo, declare) {
             this.ajaxAction("playBagPantry", {main : id});
         },
 
-        onSelectPantryItems : function ( event )
+        /// @brief Select a group of items, the game ID determines how server will respond to the selection
+        onSelectItems : function ( event )
         {
             // Send all selected items
             let id = event.currentTarget.id;
@@ -543,43 +524,28 @@ function (dojo, declare) {
             let selection = dojo.query('.selected_slot');
             for (let item of selection)
             {
+                // Add to argument to server
                 gameArgs += item.id + ' ';
             }
 
-            // TODO - remove selected_slot from all items
-
+            // Call server
             this.ajaxAction("playSelection", {main : id, selection : gameArgs});
+
+            // Remove all selections
+            dojo.query('.selected_slot').removeClass('selected_slot');
         },
 
-        onAdditive : function( event )
+        /// @brief Handles onClick action for all tokens.  Toggles selections if game state allows selection.
+        onUserClickItem : function( event )
         {
-            console.log('onAdditive');
+            console.log('onUserClickItem');
             console.log(event.target.id);
+            dojo.stopEvent(event);
+
             //let lookup = dojo.query('#' + event.target.id);
             //console.log(lookup[0]);
             //console.log(lookup.length);
             dojo.toggleClass(event.target.id, 'selected_slot');
-
-
-            //this.ajaxAction("playAbility", {});
-            /*
-            var items = this.flavorRow1.getSelectedItems();
-
-            if (items.length > 0) {
-                if (this.checkAction('playCard', true)) {
-                    // Can play a card
-
-                    var card_id = items[0].id;
-                    console.log("on playCard "+card_id);
-
-                    this.flavorRow1.unselectAll();
-                } else if (this.checkAction('giveCards')) {
-                    // Can give cards => let the player select some cards
-                } else {
-                    this.flavorRow1.unselectAll();
-                }
-            }
-            */
         },
 
         ///////////////////////////////////////////////////
