@@ -19,14 +19,12 @@
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 
-/*
- * This is a generic class to manage game pieces.
- *
- * On DB side this is based on a standard table with the following fields:
- * token_key (string), token_location (string), token_state (int)
- *
- */
-class Tokens extends APP_GameClass {
+/// This is a generic class to manage game pieces.
+///
+/// On DB side this is based on a standard table with the following fields:
+/// token_key (string), token_location (string), token_state (int)
+class Tokens extends APP_GameClass
+{
     var $table;
     var $autoreshuffle = false; // If true, a new deck is automatically formed with a reshuffled discard as soon at is needed
     var $autoreshuffle_trigger = null; // Callback to a method called when an autoreshuffle occurs
@@ -35,7 +33,7 @@ class Tokens extends APP_GameClass {
     private $custom_fields;
     private $g_index;
 
-    // If defined, tell the name of the deck and what is the corresponding discard (ex : "mydeck" => "mydiscard")
+    /// If defined, tell the name of the deck and what is the corresponding discard (ex : "mydeck" => "mydiscard")
     function __construct()
     {
         $this->table = 'token';
@@ -43,7 +41,7 @@ class Tokens extends APP_GameClass {
         $this->g_index = array ();
     }
 
-    // MUST be called before any other method if db is not called 'token'
+    /// MUST be called before any other method if db is not called 'token'
     function init($table)
     {
         $this->table = $table;
@@ -134,7 +132,7 @@ class Tokens extends APP_GameClass {
         return $this->createTokens($tokens, null);
     }
 
-    // Get max on min state on the specific location
+    /// Get max on min state on the specific location
     function getExtremePosition($getMax, $location)
     {
         self::checkLocation($location);
@@ -152,7 +150,7 @@ class Tokens extends APP_GameClass {
             return 0;
     }
 
-    // Shuffle token of a specified location, result of the operation will changes state of the token to be a position after shuffling
+    /// Shuffle token of a specified location, result of the operation will changes state of the token to be a position after shuffling
     function shuffle($location)
     {
         self::checkLocation($location);
@@ -165,13 +163,14 @@ class Tokens extends APP_GameClass {
         }
     }
 
-    // Pick the first "$nbr" cards on top of specified deck and place it in target location
-    // Return cards infos or void array if no card in the specified location
+    /// Pick the first "$nbr" cards on top of specified deck and place it in target location
+    /// Return cards infos or void array if no card in the specified location
     function pickTokensForLocation($nbr, $from_location, $to_location, $state = 0, $no_deck_reform = false)
     {
         $tokens = self::getTokensOnTop($nbr, $from_location);
         $tokens_ids = array ();
-        foreach ( $tokens as $i => $card ) {
+        foreach ( $tokens as $i => $card )
+        {
             $tokens_ids [] = $card ['key'];
             $tokens [$i] ['location'] = $to_location;
             $tokens [$i] ['state'] = $state;
@@ -179,21 +178,21 @@ class Tokens extends APP_GameClass {
         $sql = "UPDATE " . $this->table . " SET token_location='" . addslashes($to_location) . "', token_state='$state' ";
         $sql .= "WHERE token_key IN ('" . implode("','", $tokens_ids) . "') ";
         self::DbQuery($sql);
-        if (isset($this->autoreshuffle_custom [$from_location]) && count($tokens) < $nbr && $this->autoreshuffle && ! $no_deck_reform) {
+        if (isset($this->autoreshuffle_custom [$from_location]) && (count($tokens) < $nbr) && $this->autoreshuffle && ! $no_deck_reform)
+        {
             // No more cards in deck & reshuffle is active => form another deck
             $nbr_token_missing = $nbr - count($tokens);
             self::reformDeckFromDiscard($from_location);
             $newcards = self::pickCardsForLocation($nbr_token_missing, $from_location, $to_location, $state, true); // Note: block anothr deck reform
-            foreach ( $newcards as $card ) {
+            foreach ( $newcards as $card )
+            {
                 $tokens [] = $card;
             }
         }
         return $tokens;
     }
 
-    /**
-     * Return token on top of this location, top defined as item with higher state value
-     */
+     ///@brief Return token on top of this location, top defined as item with higher state value
     function getTokenOnTop($location)
     {
         $result_arr = $this->getTokensOnTop(1, $location);
@@ -202,9 +201,7 @@ class Tokens extends APP_GameClass {
         return null;
     }
 
-    /**
-     * Return "$nbr" tokens on top of this location, top defined as item with higher state value
-     */
+    ///@brief Return "$nbr" tokens on top of this location, top defined as item with higher state value
     function getTokensOnTop($nbr, $location)
     {
         self::checkLocation($location);
@@ -224,21 +221,22 @@ class Tokens extends APP_GameClass {
     function reformDeckFromDiscard($from_location)
     {
         self::checkLocation($from_location);
-        if (isset($this->autoreshuffle_custom [$from_location]))
-            $discard_location = $this->autoreshuffle_custom [$from_location];
+        if (isset($this->autoreshuffle_custom[$from_location]))
+            $discard_location = $this->autoreshuffle_custom[$from_location];
         else
             throw new feException("reformDeckFromDiscard: Unknown discard location for $from_location !");
         self::checkLocation($discard_location);
         self::moveAllTokensInLocation($discard_location, $from_location);
         self::shuffle($from_location);
-        if ($this->autoreshuffle_trigger) {
+        if ($this->autoreshuffle_trigger)
+        {
             $obj = $this->autoreshuffle_trigger ['obj'];
             $method = $this->autoreshuffle_trigger ['method'];
             $obj->$method($from_location);
         }
     }
 
-    // Move a single token to specific location
+    /// @brief Move a single token to specific location
     function moveToken($token_key, $location, $state = 0)
     {
         self::checkLocation($location);
@@ -250,7 +248,7 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
-    // Update the state of a token
+    /// @brief Update the state of a token
     function updateStateToken($token_key, $state)
     {
         self::checkState($state);
@@ -261,7 +259,7 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
-    // Move list of tokens to specific location
+    /// @brief Move list of tokens to specific location
     function moveTokens($tokens, $location, $state = 0)
     {
         self::checkLocation($location);
@@ -273,8 +271,8 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
-    // Move a card to a specific location where card are ordered. If location_arg place is already taken, increment
-    // all tokens after location_arg in order to insert new card at this precise location
+    /// Move a card to a specific location where card are ordered. If location_arg place is already taken, increment
+    /// all tokens after location_arg in order to insert new card at this precise location
     function insertToken($token_key, $location, $state = 0)
     {
         self::checkLocation($location);
@@ -296,9 +294,9 @@ class Tokens extends APP_GameClass {
             self::insertToken($token_key, $location, $extreme_pos - 1);
     }
 
-    // Move all tokens from a location to another
-    // !!! state is reset to 0 or specified value !!!
-    // if "from_location" and "from_state" are null: move ALL cards to specific location
+    /// Move all tokens from a location to another
+    /// !!! state is reset to 0 or specified value !!!
+    /// if "from_location" and "from_state" are null: move ALL cards to specific location
     function moveAllTokensInLocation($from_location, $to_location, $from_state = null, $to_state = 0)
     {
         if ($from_location != null)
@@ -314,9 +312,7 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
-    /**
-     * Move all tokens from a location to another location arg stays with the same value
-     */
+    /// @brief Move all tokens from a location to another location arg stays with the same value
     function moveAllTokensInLocationKeepOrder($from_location, $to_location)
     {
         self::checkLocation($from_location);
@@ -327,25 +323,21 @@ class Tokens extends APP_GameClass {
         self::DbQuery($sql);
     }
 
-    /**
-     * Return all tokens in specific location
-     * note: if "order by" is used, result object is NOT indexed by ids
-     */
+    /// Return all tokens in specific location
+    /// note: if "order by" is used, result object is NOT indexed by ids
     function getTokensInLocation($location, $state = null, $order_by = null)
     {
         return $this->getTokensOfTypeInLocation(null, $location, $state, $order_by);
     }
 
-    /**
-     * Get tokens of a specific type in a specific location, since there is no field for type we use like expression on
-     * key
-     *
-     * @param string $type
-     * @param string $location
-     * @param int $state
-     *
-     * @return array mixed
-     */
+    /// Get tokens of a specific type in a specific location, since there is no field for type we use like expression on
+    /// key
+    ///
+    /// @param string $type
+    /// @param string $location
+    /// @param int $state
+    ///
+    /// @return array mixed
     function getTokensOfTypeInLocation($type, $location = null, $state = null, $order_by = null)
     {
         $sql = $this->getSelectQuery();
@@ -385,8 +377,8 @@ class Tokens extends APP_GameClass {
         return $result;
     }
 
-    // @brief Get specific token info based on token_key
-    // @return Object with token information {key, location, state}
+    /// @brief Get specific token info based on token_key
+    /// @return Object with token information {key, location, state}
     function getTokenInfo($token_key)
     {
         self::checkKey($token_key);
@@ -396,8 +388,8 @@ class Tokens extends APP_GameClass {
         return mysql_fetch_assoc($dbres);
     }
 
-    // @brief Get specific tokens info indexed by token_key
-    // @return associate array of token information {key, location, state}
+    /// @brief Get specific tokens info indexed by token_key
+    /// @return associate array of token information {key, location, state}
     function getTokensInfo($tokens_array)
     {
         self::checkTokenKeyArray($tokens_array);
@@ -438,7 +430,7 @@ class Tokens extends APP_GameClass {
             return 0;
     }
 
-    // Return an array "location" => number of cards
+    /// Return an array "location" => number of cards
     function countTokensInLocations()
     {
         $result = array ();
@@ -450,7 +442,7 @@ class Tokens extends APP_GameClass {
         return $result;
     }
 
-    // Return an array "state" => number of tokens (for this location)
+    /// Return an array "state" => number of tokens (for this location)
     function countTokensByState($location)
     {
         self::checkLocation($location);
@@ -647,13 +639,11 @@ class chaisji extends Table
         return "chaisji";
     }
 
-    /*
-        setupNewGame:
-
-        This method is called only once, when a new game is launched.
-        In this method, you must setup the game according to the game rules, so that
-        the game is ready to be played.
-    */
+    /// setupNewGame:
+    ///
+    /// This method is called only once, when a new game is launched.
+    /// In this method, you must setup the game according to the game rules, so that
+    /// the game is ready to be played.
     protected function setupNewGame( $players, $options = array() )
     {
         //// Game colors are black/green/blue/red/white
@@ -703,15 +693,13 @@ class chaisji extends Table
         /************ End of the game initialization *****/
     }
 
-    /*
-        getAllDatas:
-
-        Gather all informations about current game situation (visible by the current player).
-
-        The method is called each time the game interface is displayed to a player, ie:
-        _ when the game starts
-        _ when a player refreshes the game page (F5)
-    */
+    /// getAllDatas:
+    ///
+    /// Gather all informations about current game situation (visible by the current player).
+    ///
+    /// The method is called each time the game interface is displayed to a player, ie:
+    /// _ when the game starts
+    /// _ when a player refreshes the game page (F5)
     protected function getAllDatas()
     {
         $result = array();
@@ -794,24 +782,17 @@ class chaisji extends Table
     // @return iterative array with keys from $itemList added at the end of the array
     public function fillArrayItems(&$array, $itemList)
     {
-        $array = array_keys($itemList);
-        foreach ( $itemList as $pos => $item )
-        {
-            $jsId = $item['key'];
-            array_push($array, $jsId);
-        }
+        $array = array_merge($array, array_keys($itemList));
     }
 
-    /*
-        getGameProgression:
-
-        Compute and return the current game progression.
-        The number returned must be an integer beween 0 (=the game just started) and
-        100 (= the game is finished or almost finished).
-
-        This method is called each time we are in a game state with the "updateGameProgression" property set to true
-        (see states.inc.php)
-    */
+    /// getGameProgression:
+    ///
+    /// Compute and return the current game progression.
+    /// The number returned must be an integer beween 0 (=the game just started) and
+    /// 100 (= the game is finished or almost finished).
+    ///
+    /// This method is called each time we are in a game state with the "updateGameProgression" property set to true
+    /// (see states.inc.php)
     function getGameProgression()
     {
         // TODO: compute and return the game progression
@@ -829,9 +810,24 @@ class chaisji extends Table
     }
 
     // Test function
-    function dumpCurrentPlayer()
+    function dumpTokensPerLocation()
     {
-        $this->dump('dumpCurrentPlayer', self::getCurrentPlayerId());
+        self::trace("Immer Debug Function");
+        // Setup the board for the next players turn
+        $tokensPerLocation = $this->tokens->countTokensInLocations();
+        $this->dump('tokensPerLocation', $tokensPerLocation);
+
+        // Check pantry that items are in place
+        $pantryAreas = array('spot_1', 'spot_2', 'spot_3', 'spot_4', 'spot_5');
+        foreach ($pantryAreas as $pos => $loc)
+        {
+            $this->dump('loc', $loc);
+            // If key does not exist then it has a count of zero
+            if (!array_key_exists($loc, $tokensPerLocation))
+            {
+                self::trace('This location is empty');
+            }
+        }
     }
 
     // Test function
@@ -841,6 +837,12 @@ class chaisji extends Table
         $data = self::getCollectionFromDb( $sql );
 
         $this->dump('dumpActivePlayer', $data);
+    }
+
+    function testSavePoint()
+    {
+        // Create a save point at the end of this routine (start of next players turn)
+        $this->undoSavePoint();
     }
 
     function initTables()
@@ -944,29 +946,6 @@ class chaisji extends Table
 //////////// Player actions
 ////////////
 
-    /*
-        Each time a player is doing some game action, one of the methods below is called.
-        (note: each method below must match an input method in chaisji.action.php)
-
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' );
-
-        $player_id = self::getActivePlayerId();
-
-        // Add your game logic to play a card there
-        ...
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-    */
     function st______PLAYER_ACTIONS___()
     {
         return 0;
@@ -998,7 +977,7 @@ class chaisji extends Table
                 $this->gamestate->nextState('next');
                 break;
             case 'button_undo_id':
-                $this->gamestate->nextState('loopback');
+                $this->undoRestorePoint();
                 break;
             default:
                 $this->gamestate->nextState('next');
@@ -1008,9 +987,9 @@ class chaisji extends Table
         $this->dump('main', $stateId);
     }
 
-    // This handles pantry bag selection.  There are two possible actions: reset and bag.
-    //  'Reset' costs 1 money and resets all 5 pantry tokens
-    //  'Bag' selects one token from the bag.  This is one of the 3 that the user is allowed
+    /// This handles pantry bag selection.  There are two possible actions: reset and bag.
+    ///  'Reset' costs 1 money and resets all 5 pantry tokens
+    ///  'Bag' selects one token from the bag.  This is one of the 3 that the user is allowed
     function action_PantryBagSelection( $cmdId )
     {
         // Verify that action is legal
@@ -1055,6 +1034,9 @@ class chaisji extends Table
                 'action_id' => $cmdId,
                 'pantry_board' => $new_board)
             );
+
+            // Cannot undo this action
+            $this->undoSavePoint();
         }
         else if ($cmdId == 'button_bagpantry_id')
         {
@@ -1071,6 +1053,9 @@ class chaisji extends Table
                 'player_name' => self::getActivePlayerName(),
                 'token' => $token_update)
             );
+
+            // Cannot undo this action
+            $this->undoSavePoint();
         }
     }
 
@@ -1151,6 +1136,44 @@ class chaisji extends Table
 
     function st_gameTurnNextPlayer()
     {
+        // Setup the board for the next players turn
+        $tokensPerLocation = $this->tokens->countTokensInLocations();
+
+        // Check pantry for refresh
+        $pantryAreas = array('spot_1', 'spot_2', 'spot_3', 'spot_4', 'spot_5');
+        $tokensAddedToBoard = array();
+        foreach ($pantryAreas as $pos => $loc)
+        {
+            if (!array_key_exists($loc, $tokensPerLocation))
+            {
+                ///TODO - need to handle case where pantry_stock is empty
+                $tokens = $this->tokens->pickTokensForLocation(1, 'pantry_stock', $loc);
+                $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+            }
+        }
+
+        if (count($tokensAddedToBoard) > 0)
+        {
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('Pantry restocked'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
+        }
+
+        // Check market for refresh
+        $pantryAreas = array('market_1', 'market_2', 'market_3');
+        $tokensAddedToBoard = array();
+
+        foreach ($pantryAreas as $pos => $loc)
+        {
+            if (!array_key_exists($loc, $tokensPerLocation))
+            {
+                ///TODO - need to handle case where pantry_stock is empty
+                $tokens = $this->tokens->pickTokensForLocation(1, 'pantry_stock', $loc);
+                $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+            }
+        }
+
         // Set active player to the next person in turn order
         $next_player_id = $this->activeNextPlayer();
 
