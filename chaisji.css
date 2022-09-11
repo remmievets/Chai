@@ -70,17 +70,22 @@
 
 /* Top level game area class */
 .anchor {
-    position: relative;
-    width: 100%;
+    /*position: relative;*/
+    /*width: 100%;*/
     max-width: 1076px;
-    height: auto;
+    /*height: auto;*/
     margin: auto;
     display: block;
     overflow: auto;
+    /*text-align: center;*/
+}
+
+.center_area {
+    text-align: center;
 }
 
 .board_area {
-    margin-right: 10px;
+    margin: 10px;
     text-align: center;
     position: relative;
     float: left;
@@ -90,7 +95,6 @@
     width: 480px;
     height: 400px;
     position: relative;
-    display: in-block;
     background-image: url('img/market.jpg');
     background-color: rgba(255, 255, 255, 0.4);
     background-blend-mode: lighten;
@@ -115,6 +119,14 @@
     background-image: url('img/flavors.png');
 }
 
+/* for player panel */
+.ppflavor {
+    width: 30px;
+    border-radius: 10px;
+    background-image: url('img/flavors.png');
+    background-size: 210px;
+}
+
 .flavor_lemon    { background-position: calc(100%/ 6 * 0) 0%; }
 .flavor_mint     { background-position: calc(100%/ 6 * 1) 0%; }
 .flavor_berries  { background-position: calc(100%/ 6 * 2) 0%; }
@@ -127,7 +139,6 @@
     width: 400px;
     height: 400px;
     position: relative;
-    display: in-block;
     background-image: url('img/pantry.jpg');
     background-color: rgba(255, 255, 255, 0.4);
     background-blend-mode: lighten;
@@ -150,8 +161,15 @@
     position: relative;
     display: inline-flex;
     background-image: url('img/additives.png');
-    box-shadow: 3px 3px 5px grey;
     border-radius: 45px;
+}
+
+/* for player panel */
+.ppadditive {
+    width: 60px;
+    height: 60px;
+    background-image: url('img/additives.png');
+    background-size: 180px;
 }
 
 .additive_chai    { background-position: calc(100%/ 2 * 0) calc(100%/ 1 * 0); }
@@ -161,18 +179,17 @@
 .additive_honey   { background-position: calc(100%/ 2 * 1) calc(100%/ 1 * 1); }
 .additive_awild   { background-position: calc(100%/ 2 * 2) calc(100%/ 1 * 1); }
 
-.area_margin {
-    margin-top: 1em;
-}
-
 /* items for player boards at the bottom of the screen */
 .player_board {
     clear: both;
 }
 
 .nameslot {
-    font-size: medium;
-    text-shadow: -1px 0 grey, 0 1px grey, 1px 0 grey, 0 -1px grey;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.nameslot_white {
+    text-shadow: -1px 0 white, 0 1px white, 1px 0 white, 0 -1px white;
 }
 
 .pboard {
@@ -184,9 +201,28 @@
 
 .pboard_full {
     width: 100%;
-    position: block;
     margin-top: 10px;
     margin-bottom: 10px;
+}
+
+#pboard_full_330000 {
+    background: rgba(51,0,0,0.3);
+}
+
+#pboard_full_00CC00 {
+    background: rgba(0,204,0,0.3);
+}
+
+#pboard_full_0000FF {
+    background: rgba(0,0,255,0.3);
+}
+
+#pboard_full_FF0000 {
+    background: rgba(255,0,0,0.3);
+}
+
+#pboard_full_FFFFFF {
+    background: rgba(255,255,255,0.3);
 }
 
 .pflavor {
@@ -247,22 +283,6 @@
     line-height: 32px;
 }
 
-/* for player panel */
-.ppflavor {
-    width: 30px;
-    border-radius: 10px;
-    background-image: url('img/flavors.png');
-    background-size: 210px;
-}
-
-/* for player panel */
-.ppadditive {
-    width: 60px;
-    height: 60px;
-    background-image: url('img/additives.png');
-    background-size: 180px;
-}
-
 /* tip jar */
 .tipjar {
     display: inline-block;
@@ -278,16 +298,13 @@
 .card {
     display: inline-block;
     position: relative;
-    background-color: white;
     background-image: url('img/chaiCards5x11-small.jpg');
     background-size: 1200px;
     border-radius: 7px;
-    box-shadow: 1px 1px 1px 0px #222;
     z-index: 20;
     width: 108px;
     height: 187px;
-    margin-left: 15px;
-    margin-right: 15px;
+    margin: 15px;
 }
 
 .customer_0_330000 {
@@ -512,16 +529,13 @@
 
 .abilitycard {
     display: inline-block;
-    position: relative;
-    background-color: white;
     background-image: url('img/chai_ability_cards.jpg');
     border-radius: 7px;
-    box-shadow: 1px 1px 1px 0px #222;
+    background-size: 1200px;
     z-index: 20;
-    width: 187px;
-    height: 106px;
-    margin-left: 15px;
-    margin-right: 15px;
+    width: 300px;
+    height: 170px;
+    margin: 15px;
 }
 
 .card_ability_0 {
@@ -561,6 +575,11 @@
     position: relative;
     z-index: 20;
     margin-left: 5px;
+}
+
+/* for player panel */
+.pptea {
+    background-size: 180px;
 }
 
 .tea_330000 {

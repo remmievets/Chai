@@ -66,9 +66,20 @@ function (dojo, declare) {
                 {
                     let color = gamedatas.players[player_id].color;
 
+                    // Add correct shadowing to player names
+                    if (color == '330000' || color == '0000FF')
+                    {
+                        // Use white shading
+                        dojo.addClass('name_' + color, 'nameslot_white');
+                    }
+                    else
+                    {
+                        // Use black shading
+                        dojo.addClass('name_' + color, 'nameslot');
+                    }
+
                     // Setting up players boards if needed
-                    let playerBoardDiv = dojo.byId('player_board_' + player_id);
-                    dojo.place('playerpanel_' + color, playerBoardDiv);
+                    dojo.place('playerpanel_' + color, 'player_board_' + player_id);
 
                     // Setup counter for each item by player id
                     this.counters[player_id] = [];
@@ -306,11 +317,13 @@ function (dojo, declare) {
         },
 
         /// Create a div object from a token name
-        /// @returns tokenDiv object
+        /// @returns tokenDiv object or null if token will not appear on the board
         createToken : function( token )
         {
             let tokenMainType = this.getTokenMainType(token);
             let tokenClasses = '';
+            let createToken = true;
+            let tokenDiv = null;
             switch (tokenMainType)
             {
                 case 'card':
@@ -325,20 +338,24 @@ function (dojo, declare) {
                 case 'pantry':
                     tokenClasses = 'shadow additive ' + this.getAdditiveIdentifer(token);
                     break;
-                case 'tea':
-                    tokenClasses = 'tea ' + this.getGenericType(token);
-                    break;
+                //case 'tea':
+                //    tokenClasses = 'tea ' + this.getGenericType(token);
+                //    break;
                 case 'tip':
                     tokenClasses = 'tipjar';
                     break;
                 default:
+                    createToken = false;
                     break;
             }
-            let tokenDiv = this.format_block('jstpl_token',
+            if (createToken)
+            {
+                tokenDiv = this.format_block('jstpl_token',
                 {
                     "id" : token,
                     "classes" : tokenClasses,
                 });
+            }
             return tokenDiv;
         },
 
@@ -374,7 +391,7 @@ function (dojo, declare) {
         /// Set noAnimation to false if you do not want the token to be animated during its creation (todo - not currently implemented)
         ///
         /// Adds tool tip information based on this.gamedatas.token_types[t].tooltip
-        placeToken : function( token, player_id, location, noAnimation, debug )
+        placeToken : function( token, player_id, location, noAnimation, debug=false )
         {
             try
             {
@@ -404,9 +421,12 @@ function (dojo, declare) {
                 // Determine if this item is new then create DIV
                 if (tokenDiv == null)
                 {
-                    newToken = true;
                     tokenDiv = this.createToken(token);
-                    if (debug) console.log('Create' + token);
+                    if (tokenDiv != null)
+                    {
+                        newToken = true;
+                    }
+                    if (debug) console.log('Create ' + token + ' ' + newToken);
                 }
                 else if ('parentNode' in tokenDiv && tokenDiv.parentNode != null)
                 {
@@ -432,7 +452,10 @@ function (dojo, declare) {
                 // Place the token in the location (some divs have special rules)
                 if (location.startsWith('player_'))
                 {
-                    this.placeTokenOnPlayerBoard(token, tokenDiv, this.gamedatas.players[player_id].color);
+                    if (tokenDiv != null)
+                    {
+                        this.placeTokenOnPlayerBoard(token, tokenDiv, this.gamedatas.players[player_id].color);
+                    }
 
                     // Increment the number of tokens this player has on the player panel
                     const tokenItem = this.getTokenSubType(token);
@@ -441,7 +464,7 @@ function (dojo, declare) {
                         this.counters[player_id][tokenItem].incValue(1);
                     }
                 }
-                else
+                else if (tokenDiv != null)
                 {
                     // Place the div
                     dojo.place(tokenDiv, location);
