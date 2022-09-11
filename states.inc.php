@@ -75,8 +75,7 @@ $machinestates = array(
             "next" => 25,
             "market" => 10,
             "pantry" => 11,
-            "reserve" => 12,
-            "loopback" => 2 )
+            "reserve" => 12 )
     ),
     10 => array(
         "name" => "playerMarketAction",
@@ -89,13 +88,12 @@ $machinestates = array(
         "args" => "arg_playerTurnMain",
         "transitions" => array(
             "next" => 25,
-            "advance" => 20,
-            "loopback" => 2 )
+            "advance" => 20 )
     ),
     11 => array(
         "name" => "playerPantryAction",
         "description" => clienttranslate('${actplayer} shopping for items in the pantry'),
-        "descriptionmyturn" => clienttranslate('${you} select up to three items from the pantry'),
+        "descriptionmyturn" => clienttranslate('${you} select ${pantry_state} items from the pantry'),
         "type" => "activeplayer",
         "possibleactions" => array(
             0 => "playStateChange",
@@ -104,8 +102,7 @@ $machinestates = array(
         "args" => "arg_playerTurnMain",
         "transitions" => array(
             "next" => 25,
-            "advance" => 20,
-            "loopback" => 2 )
+            "advance" => 20 )
     ),
     12 => array(
         "name" => "playerReserveAction",
@@ -119,8 +116,7 @@ $machinestates = array(
         "args" => "arg_playerTurnMain",
         "transitions" => array(
             "next" => 25,
-            "advance" => 20,
-            "loopback" => 2 )
+            "advance" => 20 )
     ),
     20 => array(
         "name" => "playerFulfillOrder",

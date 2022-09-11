@@ -620,9 +620,11 @@ class chaisji extends Table
         parent::__construct();
 
         self::initGameStateLabels( array(
-                "market_played" => 10,
-                "pantry_played" => 11,
-                "customer_reserved" => 12
+                "market_state" => 10,       // 1 means market purchase has not occurred.  Negative means user must discard
+                "pantry_state" => 11,       // # means pantry items remaining to pick up.  Negative means user must discard
+                "pantry_reset_avail" => 12, // 1 means pantry reset is available
+                "customer_state" => 13,     // 1 means customer reservation has not occurred
+                ""
         ));
             //    "my_second_global_variable" => 11,
             //      ...
@@ -633,6 +635,7 @@ class chaisji extends Table
         $this->gameinit = false;
     }
 
+    /// @brief Get the name of the game
     protected function getGameName( )
     {
         // Used for translations and stuff. Please do not modify.
@@ -673,9 +676,10 @@ class chaisji extends Table
             // Init global values with their initial values
             // During the players turn these will help keep track of the actions performed by the player
             // The player can only perform one of these actions in a turn.
-            self::setGameStateInitialValue('market_played', 0);
-            self::setGameStateInitialValue('pantry_played', 0);
-            self::setGameStateInitialValue('customer_reserved', 0);
+            self::setGameStateInitialValue('market_state', 1);
+            self::setGameStateInitialValue('pantry_state', 3);
+            self::setGameStateInitialValue('pantry_reset_avail', 1);
+            self::setGameStateInitialValue('customer_state', 1);
 
             // Init game statistics
             // (note: statistics used in this file must be defined in your stats.inc.php file)
@@ -776,10 +780,10 @@ class chaisji extends Table
         return $result;
     }
 
-    // @brief Fill an iterative array with the token keys from $itemList
-    // @note This is similar to array_keys function, but this preserves the input array (so nothing is lost)
-    //
-    // @return iterative array with keys from $itemList added at the end of the array
+    /// @brief Fill an iterative array with the token keys from $itemList
+    /// @note This is similar to array_keys function, but this preserves the input array (so nothing is lost)
+    ///
+    /// @return iterative array with keys from $itemList added at the end of the array
     public function fillArrayItems(&$array, $itemList)
     {
         $array = array_merge($array, array_keys($itemList));
@@ -845,6 +849,46 @@ class chaisji extends Table
         $this->undoSavePoint();
     }
 
+
+    /// @brief Test $cond and throw exception if $cond is false
+    ///
+    /// The message should be translated and shown to the user
+    ///
+    /// @param message string is server side log message, no translation needed
+    /// @param cond boolean condition which will be true or false (optional)
+    /// @param log string list of parameters (optional)
+    /// @throws BgaUserException
+    function userAssertTrue($message, $cond = false, $log = "")
+    {
+        if ($cond)
+            return;
+        if ($log)
+            $this->warn($message . " " . $log);
+        throw new BgaUserException($message);
+    }
+
+    /// @brief Test $cond and throw exception if $cond is false
+    ///
+    /// Use this over userAssertTrue if client prevents error, error can only occur if user hacks game
+    ///
+    /// @param log string server side log message, no translation needed
+    /// @param cond boolean condition which will be true or false (optional)
+    /// @throws BgaUserException
+    function systemAssertTrue($log, $cond = false)
+    {
+        if ($cond)
+            return;
+        //trigger_error("bt") ;
+        //$bt = debug_backtrace();
+        //$this->dump('bt',$bt);
+        $this->error("Internal Error during move: $log|");
+        //throw new feException($log);
+        throw new BgaUserException(self::_("Internal Error. That should not have happened. Please raise a bug. ") . $log); // TODO remove
+    }
+
+    /// @brief initialize the tables, this performs the token setup for the game
+    ///
+    /// Helper for setupNewGame - updates $this->tokens
     function initTables()
     {
         // ROUND will contain the round.  The game is played over 5 rounds.
@@ -932,9 +976,11 @@ class chaisji extends Table
         $this->tokens->commitGlobalIndex('ROUND');
     }
 
+    /// @brief Get the number of players in this game
+    /// @returns int  the number of players in the game
     public function getNumPlayers()
     {
-        if (! isset($this->players_basic))
+        if (!isset($this->players_basic))
         {
             $this->players_basic = $this->loadPlayersBasicInfos();
         }
@@ -951,8 +997,8 @@ class chaisji extends Table
         return 0;
     }
 
-    // This item allows control of the game states via user action
-    // $stateId - is the button ID that was selected to get into this position
+    /// This item allows control of the game states via user action
+    /// $stateId - is the button ID that was selected to get into this position
     function action_gameStateChange( $stateId )
     {
         // Verify that action is legal
@@ -983,8 +1029,8 @@ class chaisji extends Table
                 $this->gamestate->nextState('next');
                 break;
         }
-        self::trace("Immer Passes");
-        $this->dump('main', $stateId);
+        //self::trace("Immer Passes");
+        //$this->dump('main', $stateId);
     }
 
     /// This handles pantry bag selection.  There are two possible actions: reset and bag.
@@ -1067,15 +1113,64 @@ class chaisji extends Table
         $player_id = self::getActivePlayerId();
         $color = $this->getPlayerColorById($player_id);
 
-        if ($cmdId == 'button_select_pantry_id')
+        switch ($cmdId)
         {
-            // Items should be in pantry, otherwise there is a problem
-            //$tokenInfoList = $this->tokens->getTokensInfo($selection);
-            //$this->dump('tokenList', $tokenInfoList);
-            //TBD
+            case 'button_select_market_id':
+                // Verify selection of all items are in the market
+                /// TODO
 
-            // Move items to player board of the active player
-            $this->tokens->moveTokens($selection, "player_$color");
+                // Verify that all items selected are connected properly
+                /// TODO
+
+                // Verify that player has enough money to cover the cost of the tiles
+                /// TODO
+
+                // Move items to player board of the active player
+                $this->tokens->moveTokens($selection, "player_$color");
+                break;
+
+            case 'button_select_pantry_id':
+                // Items should be in pantry, otherwise there is a problem
+                //$tokenInfoList = $this->tokens->getTokensInfo($selection);
+                //$this->dump('tokenList', $tokenInfoList);
+                //TBD
+
+                $pantry = self::getGameStateValue('pantry_state');
+
+                // Verify that the number of items selected does not exceed available number player can select
+                if (count($selection) <= $pantry)
+                {
+                    // Move items to player board of the active player
+                    $this->tokens->moveTokens($selection, "player_$color");
+
+                    // Update number of available tokens
+                    $pantry = $pantry - count($selection);
+                    self::setGameStateValue('pantry_state', $pantry);
+                }
+                else
+                {
+                    // Exception
+                    $this->userAssertTrue(self::_('Too many pantry items selected'));
+                }
+                break;
+
+            case 'button_select_customer_id':
+                // Only one customer can be reserved
+                $this->systemAssertTrue('Too many items selected', count($selection) == 1);
+
+                // Verify that customer is in the plaza_area
+                ///TODO
+
+                // Verify that player does not exceed maximum items to reserve which is 3
+                ///TODO
+
+                // Move items to player board of the active player
+                $this->tokens->moveTokens($selection, "player_$color");
+                break;
+
+            default:
+                $this->systemAssertTrue(self::_('Unexpected operation in action_GenericSelection'));
+                break;
         }
 
         // This needs to be an iterable array
@@ -1085,7 +1180,11 @@ class chaisji extends Table
         self::notifyAllPlayers("tokenUpdate", clienttranslate('${player_name} selects an item from the pantry supply'), array(
             'player_id' => $player_id,
             'player_name' => self::getActivePlayerName(),
-            'token' => $tokenInfoList)
+            'token' => $tokenInfoList,
+            'market_state' => self::getGameStateValue('market_state'),
+            'pantry_state' => self::getGameStateValue('pantry_state'),
+            'pantry_reset_avail' => self::getGameStateValue('pantry_reset_avail'),
+            'customer_state' => self::getGameStateValue('customer_state'))
         );
     }
 
@@ -1107,18 +1206,11 @@ class chaisji extends Table
     //////////// --- Game state arguments generated begin ---
     function arg_playerTurnMain()
     {
-        $market = self::getGameStateValue('market_played');
-        $pantry = self::getGameStateValue('pantry_played');
-        $customer = self::getGameStateValue('customer_reserved');
-        $player_id = $this->getActivePlayerId();
-        //$color = $this->getPlayerColor($player_id);
-
         return array(
-            'market_played' => $market,
-            'pantry_played' => $pantry,
-            'customer_reserved' => $customer,
-            'active_player' => $player_id,
-            //'active_color' => $color
+            'market_state' => self::getGameStateValue('market_state'),
+            'pantry_state' => self::getGameStateValue('pantry_state'),
+            'pantry_reset_avail' => self::getGameStateValue('pantry_reset_avail'),
+            'customer_state' => self::getGameStateValue('customer_state')
         );
     }
 
@@ -1166,12 +1258,27 @@ class chaisji extends Table
 
         foreach ($pantryAreas as $pos => $loc)
         {
+            // If there are no items
             if (!array_key_exists($loc, $tokensPerLocation))
             {
                 ///TODO - need to handle case where pantry_stock is empty
-                $tokens = $this->tokens->pickTokensForLocation(1, 'pantry_stock', $loc);
+                $tokens = $this->tokens->pickTokensForLocation(6, 'flavor_stock', $loc);
                 $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
             }
+            else if ($tokensPerLocation[$loc] < 6)
+            {
+                $numToSelect = 6 - $tokensPerLocation[$loc];
+                $tokens = $this->tokens->pickTokensForLocation($numToSelect, 'flavor_stock', $loc);
+                $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+            }
+        }
+
+        if (count($tokensAddedToBoard) > 0)
+        {
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('Market restocked'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
         }
 
         // Set active player to the next person in turn order
@@ -1187,8 +1294,21 @@ class chaisji extends Table
             //return;
         //}
 
+        // Reset globals as turn advances
+        self::setGameStateInitialValue('market_state', 1);
+        self::setGameStateInitialValue('pantry_state', 3);
+
+        ///TODO if next player has no money then pantry reset option is not available at the start of the turn
+        self::setGameStateInitialValue('pantry_reset_avail', 1);
+
+        ///TODO if next player already has 3 customers reserved then customer option is not available
+        self::setGameStateInitialValue('customer_state', 1);
+
         // Otherwise continue with next players turn
         $this->gamestate->nextState('next');
+
+        // Create undo point at the start of the next players turn
+        $this->undoSavePoint();
     }
 
 //////////////////////////////////////////////////////////////////////////////

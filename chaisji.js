@@ -31,6 +31,10 @@ function (dojo, declare) {
             // Example:
             // this.myGlobalValue = 0;
             this.inSetupMode = true;
+            this.marketState = 0;
+            this.pantryState = 0;
+            this.pantryResetAvail = 0;
+            this.customerState = 0;
 
             // Array for counters
             this.counters = [];
@@ -46,8 +50,8 @@ function (dojo, declare) {
         /// in parameters.
         ///
         /// The method is called each time the game interface is displayed to a player, ie:
-        ///    _ when the game starts
-        ///    _ when a player refreshes the game page (F5)
+        ///    - when the game starts
+        ///    - when a player refreshes the game page (F5)
         ///
         /// "gamedatas" argument contains all datas retrieved by your "getAllDatas" PHP method.
         setup: function( gamedatas )
@@ -121,22 +125,8 @@ function (dojo, declare) {
         {
             console.log('Entering state: '+stateName);
 
-            switch( stateName )
-            {
-            case 'playerMarketAction':
-                console.dir(dojo.query('#market_area > flavor'));
-                break;
-
-            case 'playerPantryAction':
-                // Activate all of the pantry items and make them selectable
-                ////TODO - best to make this a function to keep active items selectable
-                console.dir(dojo.query('#pantry_board > additive'));
-
-                break;
-
-            default:
-                break;
-            }
+            // Remove all selections
+            dojo.query('.selected_slot').removeClass('selected_slot');
         },
 
         /// onLeavingState:
@@ -145,11 +135,6 @@ function (dojo, declare) {
         ///
         onLeavingState: function( stateName )
         {
-            switch( stateName )
-            {
-            case 'dummmy':
-                break;
-            }
         },
 
         /// onUpdateActionButtons:
@@ -159,9 +144,30 @@ function (dojo, declare) {
         onUpdateActionButtons: function( stateName, args )
         {
             console.log('onUpdateActionButtons: '+stateName);
-
             if( this.isCurrentPlayerActive() )
             {
+                if (args != null)
+                {
+                    console.log(args);
+                    // Update state information for available actions on players turn
+                    if ('market_state' in args)
+                    {
+                        this.marketState = args.market_state;
+                    }
+                    if ('pantry_state' in args)
+                    {
+                        this.pantryState = args.pantry_state;
+                    }
+                    if ('pantry_reset_avail' in args)
+                    {
+                        this.pantryResetAvail = args.pantry_reset_avail;
+                    }
+                    if ('customer_state' in args)
+                    {
+                        this.customerState = args.customer_state;
+                    }
+                }
+
                 switch( stateName )
                 {
                 case 'playerTurnAction':
@@ -172,6 +178,7 @@ function (dojo, declare) {
                     break;
 
                 case 'playerMarketAction':
+                    this.addActionButton( 'button_select_market_id', _('Select Tiles'), 'onSelectItems' );
                     this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
                     this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
@@ -185,6 +192,7 @@ function (dojo, declare) {
                     break;
 
                 case 'playerReserveAction':
+                    this.addActionButton( 'button_select_customer_id', _('Select Tiles'), 'onSelectItems' );
                     this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
                     this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
@@ -204,6 +212,13 @@ function (dojo, declare) {
         ///////////////////////////////////////////////////
         ///////////////////////////////////////////////////
         //// Utility methods
+
+        /// Convenient method to get state name
+        /// @return string
+        getStateName : function()
+        {
+            return this.gamedatas.gamestate.name;
+        },
 
         /// Get the translated string from a string in English
         /// @return string
@@ -359,87 +374,105 @@ function (dojo, declare) {
         /// Set noAnimation to false if you do not want the token to be animated during its creation (todo - not currently implemented)
         ///
         /// Adds tool tip information based on this.gamedatas.token_types[t].tooltip
-        placeToken : function( token, player_id, location, noAnimation )
+        placeToken : function( token, player_id, location, noAnimation, debug )
         {
-            ////@TODO - need to perform animation part of this function
-            // Lookup tokens current div
-            let tokenDiv = $(token);
-
-            // If location is "destroy" then just get rid of the item
-            if (location == "destroy")
+            try
             {
-                // Verify this item is on the board already
-                if (tokenDiv.parentNode != null)
+                ////@TODO - need to perform animation part of this function
+                // Lookup tokens current div
+                let newToken = false;
+                let tokenDiv = $(token);
+
+                // If location is "destroy" then just get rid of the item
+                if (location == "destroy")
                 {
-                    // Update game data and counters first
+                    // Verify this item is on the board already
+                    if ('parentNode' in tokenDiv && tokenDiv.parentNode != null)
+                    {
+                        // Update game data and counters first
+                        this.removeTokenFromGameData(token, tokenDiv.parentNode.id);
+
+                        // Delete the html node
+                        if (debug) console.log('Destroy' + token);
+                        dojo.destroy(tokenDiv);
+                    }
+
+                    // Do nothing else
+                    return;
+                }
+
+                // Determine if this item is new then create DIV
+                if (tokenDiv == null)
+                {
+                    newToken = true;
+                    tokenDiv = this.createToken(token);
+                    if (debug) console.log('Create' + token);
+                }
+                else if ('parentNode' in tokenDiv && tokenDiv.parentNode != null)
+                {
+                    // Exit if token is being placed in the same location it started in
+                    if (tokenDiv.parentNode.id == location)
+                    {
+                        // No need to change anything
+                        return;
+                    }
+                    // Token previously existed - this will not occur during setup
+                    // Remove token from old location
                     this.removeTokenFromGameData(token, tokenDiv.parentNode.id);
 
                     // Delete the html node
                     dojo.destroy(tokenDiv);
                 }
-
-                // Do nothing else
-                return;
-            }
-
-            // Determine if this item is new then create DIV
-            if (tokenDiv == null)
-            {
-                tokenDiv = this.createToken(token);
-            }
-            else if (tokenDiv.parentNode != null)
-            {
-                // Token previously existed - this will not occur during setup
-                // Remove token from old location
-                this.removeTokenFromGameData(token, tokenDiv.parentNode.id);
-
-                // Delete the html node
-                dojo.destroy(tokenDiv);
-            }
-            else
-            {
-                // Not a valid case - should not hit
-                return;
-            }
-
-            // Place the token in the location (some divs have special rules)
-            if (location.startsWith('player_'))
-            {
-                this.placeTokenOnPlayerBoard(token, tokenDiv, this.gamedatas.players[player_id].color);
-
-                // Increment the number of tokens this player has on the player panel
-                const tokenItem = this.getTokenSubType(token);
-                if (typeof this.counters[player_id][tokenItem] != 'undefined')
+                else
                 {
-                    this.counters[player_id][tokenItem].incValue(1);
+                    // Not a valid case - should not hit
+                    return;
+                }
+
+                // Place the token in the location (some divs have special rules)
+                if (location.startsWith('player_'))
+                {
+                    this.placeTokenOnPlayerBoard(token, tokenDiv, this.gamedatas.players[player_id].color);
+
+                    // Increment the number of tokens this player has on the player panel
+                    const tokenItem = this.getTokenSubType(token);
+                    if (typeof this.counters[player_id][tokenItem] != 'undefined')
+                    {
+                        this.counters[player_id][tokenItem].incValue(1);
+                    }
+                }
+                else
+                {
+                    // Place the div
+                    dojo.place(tokenDiv, location);
+                }
+
+                // Make token selectable
+                if (newToken)
+                {
+                    this.connect(dojo.byId(token), 'onclick', 'onUserClickItem');
+                }
+
+                // Update gamedata if not in setup
+                if (this.inSetupMode == false)
+                {
+                    // Get current location by parent node
+                    let tokenInfo = this.getTokenListByLocation(location);
+                    tokenInfo['items'].push(token);
+                }
+
+                // Add tool tip if defined for this item
+                if (typeof this.gamedatas.token_types[token] != 'undefined')
+                {
+                    this.addTooltip(token, this.gamedatas.token_types[token].tooltip, _(''), 1000);
                 }
             }
-            else
+            catch (e)
             {
-                // Place the div
-                dojo.place(tokenDiv, location);
-            }
-
-            // Make token selectable
-            //handle = dojo.connect(dojo.byId(token), "onClick", this.onUserClickItem);
-            //console.log(handle);
-            //this.connect(tokenDiv, 'onClick', 'onUserClickItem');
-            //let handle = dojo.connect(dojo.byId(token), 'onClick', this.onUserClickItem);
-            //let handle1 = dojo.connect(dojo.byId(token), 'onClick', this.onUserClickItem);
-            let handle2 = dojo.connect(dojo.byId(token), 'click', this.onUserClickItem);
-
-            // Update gamedata if not in setup
-            if (this.inSetupMode == false)
-            {
-                // Get current location by parent node
-                let tokenInfo = this.getTokenListByLocation(location);
-                tokenInfo['items'].push(token);
-            }
-
-            // Add tool tip if defined for this item
-            if (typeof this.gamedatas.token_types[token] != 'undefined')
-            {
-                this.addTooltip(token, this.gamedatas.token_types[token].tooltip, _(''), 1000);
+                console.log(token);
+                console.log(player_id);
+                console.log(location);
+                console.log("exception thrown", e.stack)
             }
         },
 
@@ -470,6 +503,82 @@ function (dojo, declare) {
                     break;
             }
             dojo.place(tokenDiv, locationBase);
+        },
+
+        /// Search and select matching adjacent tokens by subtype
+        ///     searchForType is a string and is the subtype to search for
+        ///     searchList is the list to search (3 rows and up to 6 columns)
+        ///     row is the row of the item to search adjacent items
+        ///     col is the column of the item to search adjacent items
+        /// @note recursive function, exits when no match is found or items are already selected
+        /// @return largest column index found during search
+        searchAndSelectAdjacent : function ( searchForType, searchList, row, col )
+        {
+            let srow;
+            let scol;
+            let maxCol = col;
+
+            // Search in all 4 directions
+            for (let i=0; i<4; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        // UP one row from current selection
+                        srow = row - 1;
+                        scol = col;
+                        break;
+                    case 1:
+                        // DOWN one row from current selection
+                        srow = row + 1;
+                        scol = col;
+                        break;
+                    case 2:
+                        // LEFT one column from current selection
+                        srow = row;
+                        scol = col - 1;
+                        break;
+                    case 3:
+                        // RIGHT one column from current selection
+                        srow = row;
+                        scol = col + 1;
+                        break;
+                    default:
+                        // Cannot occur
+                        break;
+                }
+                // Range check, otherwise skip
+                if ((srow >= 0) &&
+                    (srow < 3) &&
+                    (scol >= 0) &&
+                    (scol < searchList[srow].items.length))
+                {
+                    // subtype must match and the item cannot currently be selected, otherwise pass
+                    if ((this.getTokenSubType(searchList[srow].items[scol]) == searchForType) &&
+                        (dojo.hasClass(searchList[srow].items[scol], 'selected_slot') == false))
+                    {
+                        // Select current item
+                        dojo.addClass(searchList[srow].items[scol], 'selected_slot');
+
+                        // Update max column if current is larger
+                        if (scol > maxCol)
+                        {
+                            maxCol = scol;
+                        }
+
+                        // Perform iterative search of new item
+                        let fcol = this.searchAndSelectAdjacent(searchForType, searchList, srow, scol);
+
+                        // Update max column if result from function is larger
+                        if (fcol > maxCol)
+                        {
+                            maxCol = fcol;
+                        }
+                    }
+                }
+            }
+
+            return maxCol;
         },
 
         /// More convenient version of ajaxcall, do not to specify game name, and any of the handlers
@@ -515,7 +624,6 @@ function (dojo, declare) {
         /// @brief Select a group of items, the game ID determines how server will respond to the selection
         onSelectItems : function ( event )
         {
-            // Send all selected items
             let id = event.currentTarget.id;
             dojo.stopEvent(event);
 
@@ -530,22 +638,94 @@ function (dojo, declare) {
 
             // Call server
             this.ajaxAction("playSelection", {main : id, selection : gameArgs});
-
-            // Remove all selections
-            dojo.query('.selected_slot').removeClass('selected_slot');
         },
 
         /// @brief Handles onClick action for all tokens.  Toggles selections if game state allows selection.
         onUserClickItem : function( event )
         {
-            console.log('onUserClickItem');
-            console.log(event.target.id);
             dojo.stopEvent(event);
 
-            //let lookup = dojo.query('#' + event.target.id);
-            //console.log(lookup[0]);
-            //console.log(lookup.length);
-            dojo.toggleClass(event.target.id, 'selected_slot');
+            // Only the active player can perform selections
+            if (this.isCurrentPlayerActive())
+            {
+                //console.log('onUserClickItem');
+                //console.log(event.target.id);
+                let selectedNode = dojo.query('#' + event.target.id);
+
+                // Determine if current item is selected
+                let isSelected = dojo.hasClass(event.target.id, 'selected_slot');
+
+                switch( this.getStateName() )
+                {
+                case 'playerMarketAction':
+                    // Check that selected item is in the correct spot on the board
+                    if (selectedNode[0].parentNode.id.includes("market"))
+                    {
+                        // Only one item can be selected at a time, so unselect all others
+                        dojo.query('.selected_slot').removeClass('selected_slot');
+
+                        // Select new item if the item was not selected, otherwise the user was attempting to deselect
+                        if (isSelected == false)
+                        {
+                            // Select the tile that the user selected
+                            dojo.addClass(event.target.id, 'selected_slot');
+
+                            let selectedType = this.getTokenSubType(event.target.id);
+                            // Search through adjacent items and select matching tiles
+                            // Build a search list
+                            let searchList = [];
+                            searchList.push(this.getTokenListByLocation('market_1'));
+                            searchList.push(this.getTokenListByLocation('market_2'));
+                            searchList.push(this.getTokenListByLocation('market_3'));
+                            let searchRow = 0;
+                            let searchCol = 0;
+
+                            // Find which column has the first selected item
+                            for (let i=0; i<3; i++)
+                            {
+                                // Search for item
+                                if (searchList[i].items.indexOf(event.target.id) >= 0)
+                                {
+                                    // Found it
+                                    searchRow = i;
+                                    searchCol = searchList[i].items.indexOf(event.target.id);
+                                    break;
+                                }
+                            }
+                            let maxCol = this.searchAndSelectAdjacent(selectedType, searchList, searchRow, searchCol);
+                            console.log(maxCol);
+                        }
+                    }
+                    break;
+
+                case 'playerPantryAction':
+                    // Check that selected item is in the correct spot on the board
+                    if (selectedNode[0].parentNode.id.includes("spot"))
+                    {
+                        dojo.toggleClass(event.target.id, 'selected_slot');
+                    }
+                    break;
+
+                case 'playerReserveAction':
+                    // Check that selected item is in the correct spot on the board
+                    if (selectedNode[0].parentNode.id.includes("plaza_area"))
+                    {
+                        // Only one item can be selected at a time, so unselect all others
+                        dojo.query('.selected_slot').removeClass('selected_slot');
+
+                        // Select new item if the item was not selected, otherwise the user was attempting to deselect
+                        if (isSelected == false)
+                        {
+                            // Select the tile that the user selected
+                            dojo.addClass(event.target.id, 'selected_slot');
+                        }
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
         },
 
         ///////////////////////////////////////////////////
@@ -605,11 +785,50 @@ function (dojo, declare) {
             console.log('notif_tokenUpdate');
             console.log(notif);
 
-            let player_id = notif.args.player_id;
-
-            for (let tokenInfo of notif.args.token)
+            try
             {
-                this.placeToken(tokenInfo.key, player_id, tokenInfo.location, false);
+                // Perform token adjustment requested
+                let player_id = notif.args.player_id;
+
+                for (let tokenInfo of notif.args.token)
+                {
+                    this.placeToken(tokenInfo.key, player_id, tokenInfo.location, false);
+                }
+
+                // Remove all selections
+                dojo.query('.selected_slot').removeClass('selected_slot');
+
+                // Update state information for available actions on players turn
+                let updateTitle = false;
+                if ('market_state' in notif.args)
+                {
+                    this.gamedatas.gamestate.args.market_state = notif.args.market_state;
+                    updateTitle = true;
+                }
+                if ('pantry_state' in notif.args)
+                {
+                    this.gamedatas.gamestate.args.pantry_state = notif.args.pantry_state;
+                    updateTitle = true;
+                }
+                if ('pantry_reset_avail' in notif.args)
+                {
+                    this.gamedatas.gamestate.args.pantry_reset_avail = notif.args.pantry_reset_avail;
+                    updateTitle = true;
+                }
+                if ('customer_state' in notif.args)
+                {
+                    this.gamedatas.gamestate.args.customer_state = notif.args.customer_state;
+                    updateTitle = true;
+                }
+                if (updateTitle)
+                {
+                    console.log('Update page title');
+                    this.updatePageTitle();
+                }
+            }
+            catch (e)
+            {
+                console.error(notif, "Exception thrown", e.stack);
             }
         },
 
