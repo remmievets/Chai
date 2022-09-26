@@ -29,13 +29,13 @@
 			</div>
 		</div>
 	</div>
-
-	<div id="ability_area" class="board_area">
-		<h3>Abilities</h3>
-	</div>
 </div>
 
 <div id="blank_space" class="anchor">
+</div>
+
+<div id="ability_area" class="anchor center_area">
+	<h3>Abilities</h3>
 </div>
 
 <div id="plaza_area" class="anchor center_area">
@@ -46,7 +46,7 @@
 	<h3>Tips</h3>
 </div>
 
-<div id="blank_space2" class="anchor">
+<div id="holding_area" class="anchor center_area">
 </div>
 
 <div id="pboard_space" class="anchor">
@@ -56,14 +56,14 @@
 				<h2 style="color: #{COLOR}">{PLAYER_NAME}</h2>
 			</div>
 			<div id="pboard_{COLOR}" class="pboard pboard_{COLOR} shadow">
-				<div id="pflavor_{COLOR}" class="pflavor">
+				<div id="flavors_{COLOR}" class="pflavor">
 				</div>
-				<div id="padditives_{COLOR}" class="padditives">
+				<div id="additives_{COLOR}" class="padditives">
 				</div>
-				<div id="ptea_{COLOR}" class="ptea">
+				<div id="teas_{COLOR}" class="ptea">
 				</div>
 			</div>
-			<div id="pcards_{COLOR}" class="anchor">
+			<div id="customers_{COLOR}" class="anchor">
 			</div>
 		</div>
 		<!-- player panel -->
@@ -76,13 +76,15 @@
 				<div id="counter_lavender_{COLOR}" class="counter ppflavor flavor_lavender shadow textoverlay">0</div>
 				<div id="counter_ginger_{COLOR}" class="counter ppflavor flavor_ginger shadow textoverlay">0</div>
 				<div id="counter_wild_{COLOR}" class="counter ppflavor flavor_wild shadow textoverlay">0</div>
-				<div id="counter_chai_{COLOR}" class="counter ppadditive additive_chai textoverlay">0</div>
-				<div id="counter_vanilla_{COLOR}" class="counter ppadditive additive_vanilla textoverlay">0</div>
-				<div id="counter_milk_{COLOR}" class="counter ppadditive additive_milk textoverlay">0</div>
-				<div id="counter_sugar_{COLOR}" class="counter ppadditive additive_sugar textoverlay">0</div>
-				<div id="counter_honey_{COLOR}" class="counter ppadditive additive_honey textoverlay">0</div>
-				<div id="counter_awild_{COLOR}" class="counter ppadditive additive_awild textoverlay">0</div>
-				<div id="counter_tea_{COLOR}" class="counter tea_{COLOR} textoverlay">0</div>
+				<div id="counter_chai_{COLOR}" class="counter ppadditive additive_chai shadow textoverlay">0</div>
+				<div id="counter_vanilla_{COLOR}" class="counter ppadditive additive_vanilla shadow textoverlay">0</div>
+				<div id="counter_milk_{COLOR}" class="counter ppadditive additive_milk shadow textoverlay">0</div>
+				<div id="counter_sugar_{COLOR}" class="counter ppadditive additive_sugar shadow textoverlay">0</div>
+				<div id="counter_honey_{COLOR}" class="counter ppadditive additive_honey shadow textoverlay">0</div>
+				<div id="counter_awild_{COLOR}" class="counter ppadditive additive_awild shadow textoverlay">0</div>
+				<div id="counter_money_{COLOR}" class="counter ppmoney money_one shadow textoverlay">0</div>
+				<div id="counter_tea_{COLOR}" class="counter pptea tea_{COLOR} textoverlay">0</div>
+				<div id="counter_customer_{COLOR}" class="counter ppcard customer_0_{COLOR} textoverlay">0</div>
 			</div>
 		</div>
 	<!-- END player_board -->

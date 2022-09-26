@@ -122,6 +122,7 @@
 /* for player panel */
 .ppflavor {
     width: 30px;
+    height: 30px;
     border-radius: 10px;
     background-image: url('img/flavors.png');
     background-size: 210px;
@@ -166,10 +167,11 @@
 
 /* for player panel */
 .ppadditive {
-    width: 60px;
-    height: 60px;
     background-image: url('img/additives.png');
-    background-size: 180px;
+    background-size: 120px;
+    width: 40px;
+    height: 40px;
+    border-radius: 25px;
 }
 
 .additive_chai    { background-position: calc(100%/ 2 * 0) calc(100%/ 1 * 0); }
@@ -178,6 +180,30 @@
 .additive_sugar   { background-position: calc(100%/ 2 * 0) calc(100%/ 1 * 1); }
 .additive_honey   { background-position: calc(100%/ 2 * 1) calc(100%/ 1 * 1); }
 .additive_awild   { background-position: calc(100%/ 2 * 2) calc(100%/ 1 * 1); }
+
+/* tip jar */
+.tipjar {
+    display: inline-block;
+    position: relative;
+    background-image: url('img/chai_tip_jar.png');
+    width: 90px;
+    height: 90px;
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+/* Money */
+.ppmoney {
+    background-image: url('img/chai_money.png');
+    background-size: 120px;
+    width: 40px;
+    height: 40px;
+    border-radius: 25px;
+}
+
+.money_one   { background-position: calc(100%/ 2 * 0) 0; }
+.money_two   { background-position: calc(100%/ 2 * 1) 0; }
+.money_three { background-position: calc(100%/ 2 * 2) 0; }
 
 /* items for player boards at the bottom of the screen */
 .player_board {
@@ -267,8 +293,11 @@
 
 /* for player panel */
 .counter {
-    display: inline-block;
-    margin-left: 0px;
+    display: inline-flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    margin: 0px;
 }
 
 /* for player panel */
@@ -277,21 +306,42 @@
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     font-weight: bold;
     font-size: large;
-    align-items: center;
-    justify-content: center;
     text-align: center;
-    line-height: 32px;
 }
 
-/* tip jar */
-.tipjar {
-    display: inline-block;
+.tea {
+    display: inline-flex;
     position: relative;
-    background-image: url('img/chai_tip_jar.png');
-    width: 90px;
-    height: 90px;
-    margin-left: 15px;
-    margin-right: 15px;
+    z-index: 20;
+    margin-left: 5px;
+}
+
+/* for player panel */
+.pptea {
+    background-size: contain;
+    background-repeat: no-repeat;
+    width: 40px;
+    height: 40px;
+}
+
+.tea_330000 {
+    background-image: url('img/chai_tea_black.png');
+}
+
+.tea_00CC00 {
+    background-image: url('img/chai_tea_green.png');
+}
+
+.tea_0000FF {
+    background-image: url('img/chai_tea_blue.png');
+}
+
+.tea_FF0000 {
+    background-image: url('img/chai_tea_red.png');
+}
+
+.tea_FFFFFF {
+    background-image: url('img/chai_tea_white.png');
 }
 
 /* cards */
@@ -305,6 +355,15 @@
     width: 108px;
     height: 187px;
     margin: 15px;
+}
+
+/* for player panel */
+.ppcard {
+    background-image: url('img/chaiCards5x11-small.jpg');
+    background-size: 256px;
+    border-radius: 7px;
+    width: 23px;
+    height: 40px;
 }
 
 .customer_0_330000 {
@@ -568,46 +627,4 @@
 
 .card_ability_7 {
     background-position: calc(100%/ 3 * 3) calc(100%/ 1 * 1);
-}
-
-.tea {
-    display: inline-flex;
-    position: relative;
-    z-index: 20;
-    margin-left: 5px;
-}
-
-/* for player panel */
-.pptea {
-    background-size: 180px;
-}
-
-.tea_330000 {
-    background-image: url('img/chai_tea_black.png');
-    width: 62px;
-    height: 90px;
-}
-
-.tea_00CC00 {
-    background-image: url('img/chai_tea_green.png');
-    width: 51px;
-    height: 90px;
-}
-
-.tea_0000FF {
-    background-image: url('img/chai_tea_blue.png');
-    width: 50px;
-    height: 90px;
-}
-
-.tea_FF0000 {
-    background-image: url('img/chai_tea_red.png');
-    width: 30px;
-    height: 90px;
-}
-
-.tea_FFFFFF {
-    background-image: url('img/chai_tea_white.png');
-    width: 60px;
-    height: 90px;
 }

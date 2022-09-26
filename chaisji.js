@@ -85,6 +85,7 @@ function (dojo, declare) {
                     this.counters[player_id] = [];
                     let counter_div_id = '';
 
+                    // Setup player panel counters for flavors, pantry items, tea, money, and reserved customers
                     // Add tip to player board for items - add name of items
                     for (let t of gamedatas.ordered_flavors)
                     {
@@ -100,6 +101,21 @@ function (dojo, declare) {
                         this.counters[player_id][t].create(counter_div_id);
                         this.addTooltip(counter_div_id, gamedatas.token_types[t].name, _(''), 1000);
                     }
+                    // Counter for tea tokens (player panel)
+                    counter_div_id = 'counter_tea_' + color;
+                    this.counters[player_id]['tea'] = new ebg.counter();
+                    this.counters[player_id]['tea'].create(counter_div_id);
+                    // Counter for money (player panel)
+                    counter_div_id = 'counter_money_' + color;
+                    this.counters[player_id]['money'] = new ebg.counter();
+                    this.counters[player_id]['money'].create(counter_div_id);
+                    // Counter for reserved customers cards (player panel)
+                    counter_div_id = 'counter_customer_' + color;
+                    this.counters[player_id]['customer'] = new ebg.counter();
+                    this.counters[player_id]['customer'].create(counter_div_id);
+
+                    // Set counter value for money
+                    this.counters[player_id]['money'].setValue(gamedatas.players[player_id].money);
                 }
 
                 // Place initial tokens
@@ -195,10 +211,20 @@ function (dojo, declare) {
                     break;
 
                 case 'playerPantryAction':
-                    this.addActionButton( 'button_resetpantry_id', _('Reset pantry for 1 coin'), 'onPantryButton' );
-                    this.addActionButton( 'button_bagpantry_id', _('Pull one pantry token from bag'), 'onPantryButton' );
-                    this.addActionButton( 'button_select_pantry_id', _('Select Tiles'), 'onSelectItems' );
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
+                    if (this.pantryState > 0)
+                    {
+                        this.addActionButton( 'button_resetpantry_id', _('Reset pantry for 1 coin'), 'onPantryButton' );
+                        this.addActionButton( 'button_bagpantry_id', _('Pull one pantry token from bag'), 'onPantryButton' );
+                        this.addActionButton( 'button_select_pantry_id', _('Select Tiles'), 'onSelectItems' );
+                    }
+                    else if (this.pantryState == 0)
+                    {
+                        this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
+                    }
+                    else if (this.pantryState < 0)
+                    {
+                        this.addActionButton( 'button_trash_pantry_id', _('Trash Selected Tiles'), 'onSelectItems');
+                    }
                     this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
                     break;
 
@@ -298,11 +324,18 @@ function (dojo, declare) {
         ///  This may be passed the parent Node - if that happens then we need to check for players locations
         getTokenListByLocation : function( location )
         {
-            // Convert pflavor_{COLOR}, padditives_{COLOR}, ptea_{COLOR} to player_{COLOR}
-            if (location.startsWith('pflavor_') || location.startsWith('padditives_') || location.startsWith('ptea_'))
+            // Convert flavors_{COLOR}, additives_{COLOR}, pteas_{COLOR} to player_{COLOR}
+            if (location.startsWith('flavors_') || location.startsWith('additives_') || location.startsWith('teas_'))
             {
-                let tt = token.split('_');
-                location = 'player_' + tt[1];
+                let player_id = this.getActivePlayerId();
+                let color = this.gamedatas.players[player_id]['color'];
+                location = 'player_' + color;
+            }
+            else if (location.startsWith('holding_area'))
+            {
+                let player_id = this.getActivePlayerId();
+                let color = this.gamedatas.players[player_id]['color'];
+                location = 'player_holding_' + color;
             }
 
             // Search through token lists
@@ -376,10 +409,15 @@ function (dojo, declare) {
             if (location.startsWith('player_'))
             {
                 const player_id = tokenInfo['player_id'];
+                const tokenType = this.getTokenMainType(token);
                 const tokenItem = this.getTokenSubType(token);
                 if (typeof this.counters[player_id][tokenItem] != 'undefined')
                 {
                     this.counters[player_id][tokenItem].decValue(1);
+                }
+                else if  (typeof this.counters[player_id][tokenType] != 'undefined')
+                {
+                    this.counters[player_id][tokenType].decValue(1);
                 }
             }
         },
@@ -400,8 +438,8 @@ function (dojo, declare) {
                 let newToken = false;
                 let tokenDiv = $(token);
 
-                // If location is "destroy" then just get rid of the item
-                if (location == "destroy")
+                // If location is "destroy" or "discard" then just get rid of the item
+                if (location.includes("destroy") || location.includes("discard"))
                 {
                     // Verify this item is on the board already
                     if ('parentNode' in tokenDiv && tokenDiv.parentNode != null)
@@ -454,14 +492,19 @@ function (dojo, declare) {
                 {
                     if (tokenDiv != null)
                     {
-                        this.placeTokenOnPlayerBoard(token, tokenDiv, this.gamedatas.players[player_id].color);
+                        this.placeTokenOnPlayerBoard(token, tokenDiv, location, this.gamedatas.players[player_id].color);
                     }
 
                     // Increment the number of tokens this player has on the player panel
+                    const tokenType = this.getTokenMainType(token);
                     const tokenItem = this.getTokenSubType(token);
                     if (typeof this.counters[player_id][tokenItem] != 'undefined')
                     {
                         this.counters[player_id][tokenItem].incValue(1);
+                    }
+                    else if  (typeof this.counters[player_id][tokenType] != 'undefined')
+                    {
+                        this.counters[player_id][tokenType].incValue(1);
                     }
                 }
                 else if (tokenDiv != null)
@@ -500,30 +543,37 @@ function (dojo, declare) {
         },
 
         /// Place a token onto a player board - based on player color.
-        ///      flavors goto - pflavor_{COLOR} (max 12)
-        ///      additives goto - padditives_{COLOR} (max 6)
-        ///      teas goto - ptea_{COLOR}
-        ///      customers goto - pcards_{COLOR}
-        placeTokenOnPlayerBoard : function( token, tokenDiv, playerColor )
+        ///      flavors goto - flavors_{COLOR} (max 12)
+        ///      additives goto - additives_{COLOR} (max 6)
+        ///      teas goto - teas_{COLOR}
+        ///      customers goto - customers_{COLOR}
+        placeTokenOnPlayerBoard : function( token, tokenDiv, loc, playerColor )
         {
-            let tokenMainType = this.getTokenMainType(token);
             let locationBase = '';
-            switch (tokenMainType)
+            if (loc.startsWith('player_holding'))
             {
-                case 'customer':
-                    locationBase = 'pcards_' + playerColor.toString();
-                    break;
-                case 'flavor':
-                    locationBase = 'pflavor_' + playerColor.toString();
-                    break;
-                case 'pantry':
-                    locationBase = 'padditives_' + playerColor.toString();
-                    break;
-                case 'tea':
-                    locationBase = 'ptea_' + playerColor.toString();
-                    break;
-                default:
-                    break;
+                locationBase = 'holding_area';
+            }
+            else
+            {
+                let tokenMainType = this.getTokenMainType(token);
+                switch (tokenMainType)
+                {
+                    case 'customer':
+                        locationBase = 'customers_' + playerColor.toString();
+                        break;
+                    case 'flavor':
+                        locationBase = 'flavors_' + playerColor.toString();
+                        break;
+                    case 'pantry':
+                        locationBase = 'additives_' + playerColor.toString();
+                        break;
+                    case 'tea':
+                        locationBase = 'teas_' + playerColor.toString();
+                        break;
+                    default:
+                        break;
+                }
             }
             dojo.place(tokenDiv, locationBase);
         },
@@ -723,9 +773,20 @@ function (dojo, declare) {
 
                 case 'playerPantryAction':
                     // Check that selected item is in the correct spot on the board
-                    if (selectedNode[0].parentNode.id.includes("spot"))
+                    if (this.pantryState > 0)
                     {
-                        dojo.toggleClass(event.target.id, 'selected_slot');
+                        if (selectedNode[0].parentNode.id.includes("spot"))
+                        {
+                            dojo.toggleClass(event.target.id, 'selected_slot');
+                        }
+                    }
+                    else if (this.pantryState < 0)
+                    {
+                        if (selectedNode[0].parentNode.id.includes("additives") ||
+                            selectedNode[0].parentNode.id.includes("holding_area"))
+                        {
+                            dojo.toggleClass(event.target.id, 'selected_slot');
+                        }
                     }
                     break;
 

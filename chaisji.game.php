@@ -411,6 +411,10 @@ class Tokens extends APP_GameClass
         return $result;
     }
 
+    /// @brief Returns the number of tokens at a location.  If the location contains % then LIKE is used instead of exact location
+    /// @param location
+    /// @param state (optional)
+    /// @returns integer value
     function countTokensInLocation($location, $state = null)
     {
         self::checkLocation($location, true);
@@ -423,6 +427,28 @@ class Tokens extends APP_GameClass
         $sql .= " WHERE token_location $like '$location' ";
         if ($state !== null)
             $sql .= "AND token_state='$state' ";
+        $dbres = self::DbQuery($sql);
+        if ($row = mysql_fetch_assoc($dbres))
+            return $row ['cnt'];
+        else
+            return 0;
+    }
+
+    /// @brief Returns the number of tokens at a location where token_key starts with a string
+    /// @param location
+    /// @param tokenSearchKey This should be a search string containing %
+    /// @returns integer value
+    function countTokensTypeInLocation($location, $tokenSearchKey)
+    {
+        self::checkLocation($location, true);
+        $like = "LIKE";
+        if (strpos($location, "%") === false) {
+            $like = "=";
+        }
+        $sql = "SELECT COUNT( token_key ) cnt FROM " . $this->table;
+        $sql .= " WHERE token_location $like '$location' ";
+        if ($tokenSearchKey !== null)
+            $sql .= "AND token_key LIKE '$tokenSearchKey' ";
         $dbres = self::DbQuery($sql);
         if ($row = mysql_fetch_assoc($dbres))
             return $row ['cnt'];
@@ -657,6 +683,10 @@ class chaisji extends Table
 
         // Create players
         // Note: if you added some extra field on "player" table in the database (dbmodel.sql), you can initialize it there.
+        foreach( $players as $player_id => $player )
+        {
+            $player['player_money'] = 0;
+        }
         $sql = "INSERT INTO player (player_id, player_color, player_canal, player_name, player_avatar) VALUES ";
         $values = array();
         foreach( $players as $player_id => $player )
@@ -712,7 +742,7 @@ class chaisji extends Table
 
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, player_color color FROM player ";
+        $sql = "SELECT player_id id, player_score score, player_color color, player_money money FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
 
         // Note: Gather all information about current game situation (visible by player $current_player_id).
@@ -730,8 +760,6 @@ class chaisji extends Table
         //  plaza -> cards available in plaza
         //  tip_jars -> the available tip jars this round
         //  player_$color -> information for player boards and cards (second loop below)
-        // TBD
-        //  Round ?
         $result['tokens'] = array();
         $locValue = 0;
         foreach ($this->gameDataLocs as $pos => $loc)
@@ -758,16 +786,26 @@ class chaisji extends Table
             $locValue++;
         }
 
-        // Player boards will contain teas, flavors, pantry items, cards, and (money?)
+        // Player boards will contain teas, flavors, pantry items, and cards
         $this->players_basic = $this->loadPlayersBasicInfos();
         foreach ($this->players_basic as $player_id => $player_info)
         {
             // Setup info
             $color = $player_info['player_color'];
-            $loc = "player_$color";
             $idx = $player_id;
 
-            // Setup element in array
+            // Setup element in array - these are directly controlled by player
+            $loc = "player_$color";
+            $result['tokens'][$locValue] = array();
+            $result['tokens'][$locValue]['loc'] = $loc;
+            $result['tokens'][$locValue]['player_id'] = $idx;
+            $result['tokens'][$locValue]['items'] = array();
+
+            $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc));
+            $locValue++;
+
+            // These are the items player has selected, but has yet to confirm
+            $loc = "player_holding_$color";
             $result['tokens'][$locValue] = array();
             $result['tokens'][$locValue]['loc'] = $loc;
             $result['tokens'][$locValue]['player_id'] = $idx;
@@ -776,6 +814,9 @@ class chaisji extends Table
             $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc));
             $locValue++;
         }
+
+        // Round information
+        $result['round'] =  $this->tokens->syncGlobalIndex('ROUND');
 
         return $result;
     }
@@ -849,6 +890,58 @@ class chaisji extends Table
         $this->undoSavePoint();
     }
 
+    /// @brief Set a players money total
+    ///
+    /// @param player_id
+    /// @param money
+    function setPlayerMoney($player_id, $money)
+    {
+        $sql = "UPDATE player
+                SET player_money = $money
+                WHERE player_id = $player_id";
+        self::DbQuery($sql);
+    }
+
+    /// @brief Get a players money total as an integer value
+    ///
+    /// @param player_id
+    /// @returns integer value
+    function getPlayerMoney($player_id)
+    {
+        $sql = "SELECT player_money
+                FROM player
+                WHERE  player_id = $player_id";
+        $money = self::getNonEmptyObjectFromDb($sql);
+        return intval($money['player_money']);
+    }
+
+    /// @brief Increments a players money total by a specific amount
+    ///
+    /// @param player_id
+    /// @param inc The amount of money to increase
+    function incPlayerMoney($player_id, $inc)
+    {
+        $money = $this->getPlayerMoney($player_id);
+        $money = $money + $inc;
+        $this->setPlayerMoney($player_id, $money);
+    }
+
+    /// @brief Decrements a players money total by an amount.  Returns false if player does not have enough money.
+    ///
+    /// @param player_id
+    /// @param dec The amount of money to decrease
+    /// @returns bool - true if money adjusted, false if money would go negative
+    function decPlayerMoney($player_id, $dec)
+    {
+        $money = $this->getPlayerMoney($player_id);
+        if ($money >= $dec)
+        {
+            $money = $money - $dec;
+            $this->setPlayerMoney($player_id, $money);
+            return true;
+        }
+        return false;
+    }
 
     /// @brief Test $cond and throw exception if $cond is false
     ///
@@ -944,6 +1037,13 @@ class chaisji extends Table
         $this->tokens->shuffle('ability_deck');
         $this->tokens->pickTokensForLocation(3, 'ability_deck', 'ability_area');
 
+        // 4a. If card_ability_2 is taken then put 3 flavor tokens on the card
+        $specialToken = $this->tokens->getTokenInfo('card_ability_2');
+        if ($specialToken['location'] == 'ability_area')
+        {
+            $this->tokens->pickTokensForLocation(3, 'flavor_stock', 'card_ability_2');
+        }
+
         // 5. Tea tokens. 6 per player
         // 6. Customer cards. 11 per player
         //  1 in reserve
@@ -951,7 +1051,7 @@ class chaisji extends Table
         //  6 in deck
         //  Remaining are discarded
         // 7. Money (1 for first player and 2 for everyone else)
-        //$money = 1;
+        $money = 1;
         foreach ( $this->players_basic as $player_id => $player_info )
         {
             $color = $player_info ['player_color'];
@@ -964,11 +1064,10 @@ class chaisji extends Table
             $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
             $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
             // 7.
-            //$this->tokens->createTokensPack("money_$color", "player_$color");
-            //$this->tokens->updateStateToken("money_$color", $money);
-            //$money = 2;
+            $this->setPlayerMoney($player_id, $money);
+            $money = 2;
         }
-        // 7. Now shuffle customer deck and deal 2 more to the plaza
+        // 8. Now shuffle customer deck and deal 2 more to the plaza
         $this->tokens->shuffle('customer_deck');
         $this->tokens->pickTokensForLocation(2, 'customer_deck', 'plaza_area');
 
@@ -1004,7 +1103,14 @@ class chaisji extends Table
         // Verify that action is legal
         $this->checkAction('playStateChange');
 
+        $player_id = self::getActivePlayerId();
+        $color = $this->getPlayerColorById($player_id);
+
         // TBD - check that action is legal
+        // Once state changes then move any tokens from the holding area to the player board
+        $this->tokens->moveAllTokensInLocation("player_holding_$color", "player_$color");
+
+        // Advance to the next game state
         switch ($stateId)
         {
             case 'button_market_id':
@@ -1141,10 +1247,21 @@ class chaisji extends Table
                 if (count($selection) <= $pantry)
                 {
                     // Move items to player board of the active player
-                    $this->tokens->moveTokens($selection, "player_$color");
+                    $this->tokens->moveTokens($selection, "player_holding_$color");
 
                     // Update number of available tokens
                     $pantry = $pantry - count($selection);
+
+                    // If selections have been made (count is zero then check for discards)
+                    if ($pantry == 0)
+                    {
+                        $totalPantry = $this->tokens->countTokensTypeInLocation("player_$color","pantry_%") + $this->tokens->countTokensInLocation("player_holding_$color");
+                        if ($totalPantry > 6)
+                        {
+                            // Must discard (should be a negative value to tell JS to perform a discard selection)
+                            $pantry = 6 - $totalPantry;
+                        }
+                    }
                     self::setGameStateValue('pantry_state', $pantry);
                 }
                 else
@@ -1154,7 +1271,33 @@ class chaisji extends Table
                 }
                 break;
 
-            case 'button_select_customer_id':
+                case 'button_trash_pantry_id':
+                    // Items should be in pantry, otherwise there is a problem
+                    //$tokenInfoList = $this->tokens->getTokensInfo($selection);
+                    //$this->dump('tokenList', $tokenInfoList);
+                    //TBD
+
+                    $pantry = self::getGameStateValue('pantry_state');
+
+                    // Verify that the number of items selected does not exceed available number player can select
+                    if (($pantry < 0) && (count($selection) <= (-1 * $pantry)))
+                    {
+                        // Move items to player board of the active player
+                        $this->tokens->moveTokens($selection, "pantry_discard");
+
+                        $totalPantry = $this->tokens->countTokensTypeInLocation("player_$color","pantry_%") + $this->tokens->countTokensInLocation("player_holding_$color");
+                        // Must discard (should be a negative value to tell JS to perform a discard selection)
+                        $pantry = 6 - $totalPantry;
+                        self::setGameStateValue('pantry_state', $pantry);
+                    }
+                    else
+                    {
+                        // Exception
+                        $this->userAssertTrue(self::_('Too many pantry items selected'));
+                    }
+                    break;
+
+                case 'button_select_customer_id':
                 // Only one customer can be reserved
                 $this->systemAssertTrue('Too many items selected', count($selection) == 1);
 
