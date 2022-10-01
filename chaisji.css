@@ -587,6 +587,7 @@
 }
 
 .abilitycard {
+    position: relative;
     display: inline-block;
     background-image: url('img/chai_ability_cards.jpg');
     border-radius: 7px;

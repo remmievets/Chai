@@ -724,6 +724,8 @@ class chaisji extends Table
             $this->dump('err', $e);
         }
         $this->gameinit = false;
+        // Create undo point at the start of the next players turn
+        $this->undoSavePoint();
         /************ End of the game initialization *****/
     }
 
@@ -924,6 +926,13 @@ class chaisji extends Table
         $money = $this->getPlayerMoney($player_id);
         $money = $money + $inc;
         $this->setPlayerMoney($player_id, $money);
+
+        self::notifyAllPlayers("moneyUpdate", clienttranslate('${player_name} collects ${inc} coins'), array(
+            'player_id' => $player_id,
+            'player_name' => self::getActivePlayerName(),
+            'inc' => $inc,
+            'money' => $money)
+        );
     }
 
     /// @brief Decrements a players money total by an amount.  Returns false if player does not have enough money.
@@ -1114,6 +1123,7 @@ class chaisji extends Table
         switch ($stateId)
         {
             case 'button_market_id':
+                $this->incPlayerMoney($player_id, 3);
                 $this->gamestate->nextState('market');
                 break;
             case 'button_pantry_id':

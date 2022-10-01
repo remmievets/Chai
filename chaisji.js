@@ -195,6 +195,10 @@ function (dojo, declare) {
                     }
                 }
 
+                // Get current items selected
+                let selection = dojo.query('.selected_slot');
+                console.log(selection);
+
                 switch( stateName )
                 {
                 case 'playerTurnAction':
@@ -205,9 +209,16 @@ function (dojo, declare) {
                     break;
 
                 case 'playerMarketAction':
-                    this.addActionButton( 'button_select_market_id', _('Select Tiles'), 'onSelectItems' );
-                    this.addActionButton( 'button_advance_id', _('Done'), 'onStateChange' );
-                    this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
+                    if (selection.length > 0)
+                    {
+                        let num = 1;
+                        this.addActionButton( 'button_select_market_id', _('Purchase Tiles for ' + num.toString()), 'onSelectItems' );
+                    }
+                    else
+                    {
+                        this.addActionButton( 'button_advance_id', _('Complete Purchases'), 'onStateChange' );
+                        this.addActionButton( 'button_undo_id', _('Undo'), 'onStateChange' );
+                    }
                     break;
 
                 case 'playerPantryAction':
@@ -768,6 +779,9 @@ function (dojo, declare) {
                             let maxCol = this.searchAndSelectAdjacent(selectedType, searchList, searchRow, searchCol);
                             console.log(maxCol);
                         }
+
+                        // Update options
+                        this.updatePageTitle();
                     }
                     break;
 
@@ -840,6 +854,7 @@ function (dojo, declare) {
             // here, associate your game notifications with local methods
             dojo.subscribe('pantryUpdate', this, 'notif_pantryUpdate');
             dojo.subscribe('tokenUpdate', this, 'notif_tokenUpdate');
+            dojo.subscribe('moneyUpdate', this, 'notif_moneyUpdate');
             dojo.subscribe('msgUpdate', this, 'notif_msgUpdate');
         },
 
@@ -909,6 +924,24 @@ function (dojo, declare) {
                     console.log('Update page title');
                     this.updatePageTitle();
                 }
+            }
+            catch (e)
+            {
+                console.error(notif, "Exception thrown", e.stack);
+            }
+        },
+
+        notif_moneyUpdate: function( notif )
+        {
+            console.log('notif_moneyUpdate');
+            console.log(notif);
+
+            try
+            {
+                let player_id = notif.args.player_id;
+                let player_money = notif.args.money;
+                // Set counter value for money
+                this.counters[player_id]['money'].setValue(player_money);
             }
             catch (e)
             {
