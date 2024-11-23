@@ -67,7 +67,8 @@ class Tokens extends APP_GameClass
             $next_pos = 0;
         $values = array ();
         $keys = array ();
-        foreach ( $tokens as $token_info ) {
+        foreach ( $tokens as $token_info )
+        {
             if (isset($token_info ['nbr']))
                 $n = $token_info ['nbr'];
             else
@@ -76,7 +77,8 @@ class Tokens extends APP_GameClass
                 $start = $token_info ['nbr_start'];
             else
                 $start = 0;
-            for ($i = $start; $i < $n + $start; $i ++) {
+            for ($i = $start; $i < $n + $start; $i ++)
+            {
                 if (isset($token_info ['location']))
                     $location = $token_info ['location'];
                 else
@@ -85,11 +87,15 @@ class Tokens extends APP_GameClass
                     $token_state = ( int ) ($token_info ['state']);
                 else
                     $token_state = $token_state_global;
-                if ($token_state === null) {
-                    if ($location == $location_global) {
+                if ($token_state === null)
+                {
+                    if ($location == $location_global)
+                    {
                         $token_state = $next_pos;
                         $next_pos ++;
-                    } else {
+                    }
+                    else
+                    {
                         $token_state = 0;
                     }
                 }
@@ -121,9 +127,11 @@ class Tokens extends APP_GameClass
             $iterArr = array ('' );
         $tokenSpec = array ('key' => $key,'location' => $location,'nbr' => $nbr,'nbr_start' => $nbr_start );
         $tokens = array ();
-        foreach ( $iterArr as $iterKey ) {
+        foreach ( $iterArr as $iterKey )
+        {
             $newspec = array ();
-            foreach ( $tokenSpec as $tokenSpecKey => $value ) {
+            foreach ( $tokenSpec as $tokenSpecKey => $value )
+            {
                 $value = $this->varsub($value, array ('TYPE' => $iterKey ));
                 $newspec [$tokenSpecKey] = $value;
             }
@@ -157,14 +165,20 @@ class Tokens extends APP_GameClass
         $token_keys = self::getObjectListFromDB("SELECT token_key FROM " . $this->table . " WHERE token_location='$location'", true);
         shuffle($token_keys);
         $n = 0;
-        foreach ( $token_keys as $token_key ) {
+        foreach ( $token_keys as $token_key )
+        {
             self::DbQuery("UPDATE " . $this->table . " SET token_state='$n' WHERE token_key='$token_key'");
             $n ++;
         }
     }
 
-    /// Pick the first "$nbr" cards on top of specified deck and place it in target location
+    ///@brief Pick the first "$nbr" cards on top of specified deck and place it in target location
     /// Return cards infos or void array if no card in the specified location
+    ///@param nbr - number of cards to select
+    ///@param from_location - location to draw tokens from
+    ///@param to_location - location to move tokens to
+    ///@param state - assign moved tokens this state value (number)
+    ///@param no_deck_reform - when true reform the deck if possible if deck is empty after drawing tokens
     function pickTokensForLocation($nbr, $from_location, $to_location, $state = 0, $no_deck_reform = false)
     {
         $tokens = self::getTokensOnTop($nbr, $from_location);
@@ -212,7 +226,8 @@ class Tokens extends APP_GameClass
         $sql .= " ORDER BY token_state DESC";
         $sql .= " LIMIT $nbr";
         $dbres = self::DbQuery($sql);
-        while ( $row = mysql_fetch_assoc($dbres) ) {
+        while ( $row = mysql_fetch_assoc($dbres) )
+        {
             $result [] = $row;
         }
         return $result;
@@ -304,7 +319,8 @@ class Tokens extends APP_GameClass
         self::checkLocation($to_location);
         $sql = "UPDATE " . $this->table . " ";
         $sql .= "SET token_location='$to_location', token_state='$to_state' ";
-        if ($from_location !== null) {
+        if ($from_location !== null)
+        {
             $sql .= "WHERE token_location='" . addslashes($from_location) . "' ";
             if ($from_state !== null)
                 $sql .= "AND token_state='$from_state' ";
@@ -342,22 +358,27 @@ class Tokens extends APP_GameClass
     {
         $sql = $this->getSelectQuery();
         $sql .= " WHERE true ";
-        if ($type !== null) {
-            if (strpos($type, "%") === false) {
+        if ($type !== null)
+        {
+            if (strpos($type, "%") === false)
+            {
                 $type .= "%";
             }
             self::checkType($type);
             $sql .= " AND token_key LIKE '$type'";
         }
-        if ($location !== null) {
+        if ($location !== null)
+        {
             self::checkLocation($location, true);
             $like = "LIKE";
-            if (strpos($location, "%") === false) {
+            if (strpos($location, "%") === false)
+            {
                 $like = "=";
             }
             $sql .= " AND token_location $like '$location' ";
         }
-        if ($state !== null) {
+        if ($state !== null)
+        {
             self::checkState($state, true);
             $sql .= " AND token_state = '$state'";
         }
@@ -366,12 +387,16 @@ class Tokens extends APP_GameClass
         $dbres = self::DbQuery($sql);
         $result = array ();
         $i = 0;
-        while ( $row = mysql_fetch_assoc($dbres) ) {
-            if ($order_by !== null) {
-                $result [$i] = $row;
-            } else {
+        while ( $row = mysql_fetch_assoc($dbres) )
+        {
+            //if ($order_by !== null)
+            //{
+            //    $result [$i] = $row;
+            //}
+            //else
+            //{
                 $result [$row ['key']] = $row;
-            }
+            //}
             $i ++;
         }
         return $result;
@@ -399,10 +424,12 @@ class Tokens extends APP_GameClass
         $sql .= " WHERE token_key IN ('" . implode("','", $tokens_array) . "') ";
         $dbres = self::DbQuery($sql);
         $result = array ();
-        while ( $row = mysql_fetch_assoc($dbres) ) {
+        while ( $row = mysql_fetch_assoc($dbres) )
+        {
             $result [$row ['key']] = $row;
         }
-        if (count($result) != count($tokens_array)) {
+        if (count($result) != count($tokens_array))
+        {
             self::error("getTokens: some cards have not been found:");
             self::error("requested: " . implode(",", $tokens_array));
             self::error("received: " . implode(",", array_keys($result)));
@@ -420,7 +447,8 @@ class Tokens extends APP_GameClass
         self::checkLocation($location, true);
         self::checkState($state, true);
         $like = "LIKE";
-        if (strpos($location, "%") === false) {
+        if (strpos($location, "%") === false)
+        {
             $like = "=";
         }
         $sql = "SELECT COUNT( token_key ) cnt FROM " . $this->table;
@@ -442,7 +470,8 @@ class Tokens extends APP_GameClass
     {
         self::checkLocation($location, true);
         $like = "LIKE";
-        if (strpos($location, "%") === false) {
+        if (strpos($location, "%") === false)
+        {
             $like = "=";
         }
         $sql = "SELECT COUNT( token_key ) cnt FROM " . $this->table;
@@ -462,7 +491,8 @@ class Tokens extends APP_GameClass
         $result = array ();
         $sql = "SELECT token_location, COUNT( token_key ) cnt FROM " . $this->table . " GROUP BY token_location ";
         $dbres = self::DbQuery($sql);
-        while ( $row = mysql_fetch_assoc($dbres) ) {
+        while ( $row = mysql_fetch_assoc($dbres) )
+        {
             $result [$row ['token_location']] = $row ['cnt'];
         }
         return $result;
@@ -477,7 +507,8 @@ class Tokens extends APP_GameClass
         $sql .= "WHERE token_location='$location' ";
         $sql .= "GROUP BY token_state ";
         $dbres = self::DbQuery($sql);
-        while ( $row = mysql_fetch_assoc($dbres) ) {
+        while ( $row = mysql_fetch_assoc($dbres) )
+        {
             $result [$row ['token_state']] = $row ['cnt'];
         }
         return $result;
@@ -487,15 +518,20 @@ class Tokens extends APP_GameClass
     {
         if ($line === null)
             throw new feException("varsub: line cannot be null");
-        if (strpos($line, "{") !== false) {
-            foreach ( $keymap as $key => $value ) {
-                if (strpos($line, "{$key}") !== false) {
+        if (strpos($line, "{") !== false)
+        {
+            foreach ( $keymap as $key => $value )
+            {
+                if (strpos($line, "{$key}") !== false)
+                {
                     $line = preg_replace("/\{$key\}/", $value, $line);
                 }
             }
             if ($usegindex)
-                foreach ( $this->g_index as $key => $value ) {
-                    if (strpos($line, "{$key}") !== false) {
+                foreach ( $this->g_index as $key => $value )
+                {
+                    if (strpos($line, "{$key}") !== false)
+                    {
                         $value ++;
                         $line = preg_replace("/\{$key\}/", $value, $line);
                         $this->g_index [$key] = $value;
@@ -512,7 +548,8 @@ class Tokens extends APP_GameClass
         $extra = "";
         if ($like)
             $extra = "%";
-        if (preg_match("/^[A-Za-z_0-9${extra}-]+$/", $location) == 0) {
+        if (preg_match("/^[A-Za-z_0-9${extra}-]+$/", $location) == 0)
+        {
             throw new feException("location must be  alphanum and underscore non empty string");
         }
     }
@@ -521,7 +558,8 @@ class Tokens extends APP_GameClass
     {
         if ($state === null && $canBeNull == false)
             throw new feException("state cannot be null");
-        if ($state !== null && preg_match("/^-*[0-9]+$/", $state) == 0) {
+        if ($state !== null && preg_match("/^-*[0-9]+$/", $state) == 0)
+        {
             throw new feException("state must be integer number");
         }
     }
@@ -532,7 +570,8 @@ class Tokens extends APP_GameClass
             throw new feException("tokens cannot be null");
         if (! is_array($arr))
             throw new feException("tokens must be an array");
-        foreach ( $arr as $key ) {
+        foreach ( $arr as $key )
+        {
             $this->checkKey($key);
         }
     }
@@ -544,7 +583,8 @@ class Tokens extends APP_GameClass
         $extra = "";
         if ($like)
             $extra = "%";
-        if (preg_match("/^[A-Za-z_0-9${extra}]+$/", $key) == 0) {
+        if (preg_match("/^[A-Za-z_0-9${extra}]+$/", $key) == 0)
+        {
             throw new feException("key must be alphanum and underscore non empty string '$key'");
         }
     }
@@ -558,7 +598,8 @@ class Tokens extends APP_GameClass
 
     final function checkPosInt($key)
     {
-        if ($key && preg_match("/^[0-9]+$/", $key) == 0) {
+        if ($key && preg_match("/^[0-9]+$/", $key) == 0)
+        {
             throw new feException("must be integer number");
         }
     }
@@ -566,7 +607,8 @@ class Tokens extends APP_GameClass
     final function getSelectQuery()
     {
         $sql = "SELECT token_key AS \"key\", token_location AS \"location\", token_state AS \"state\"";
-        if (count($this->custom_fields)) {
+        if (count($this->custom_fields))
+        {
             $sql .= ", ";
             $sql .= implode(', ', $this->custom_fields);
         }
@@ -582,7 +624,8 @@ class Tokens extends APP_GameClass
 
     function initGlobalIndex($key, $value = 1)
     {
-        if (! array_key_exists($key, $this->g_index)) {
+        if (! array_key_exists($key, $this->g_index))
+        {
             $this->checkKey($key);
             $this->checkPosInt($value);
             $sql = "INSERT INTO " . $this->table . " (token_key,token_location,token_state)";
@@ -595,7 +638,7 @@ class Tokens extends APP_GameClass
         return $value;
     }
 
-    private function setGlobalIndex($key, $value)
+    function setGlobalIndex($key, $value)
     {
         $sql = "UPDATE " . $this->table;
         $sql .= " SET token_state='$value'";
@@ -615,7 +658,8 @@ class Tokens extends APP_GameClass
         $row = mysql_fetch_assoc($dbres);
         if ($row)
             $value = $row ['token_state'];
-        else {
+        else
+        {
             unset($this->g_index [$key]);
             $value = $this->initGlobalIndex($key, 1);
         }
@@ -625,7 +669,8 @@ class Tokens extends APP_GameClass
 
     function commitGlobalIndex($key)
     {
-        if (! array_key_exists($key, $this->g_index)) {
+        if (! array_key_exists($key, $this->g_index))
+        {
             throw new feException("global index $key is not defined");
         }
         $this->setGlobalIndex($key, $this->g_index [$key]);
@@ -720,6 +765,7 @@ class chaisji extends Table
             $this->initTables();
             // Activate first player (which is in general a good idea :) )
             $this->activeNextPlayer();
+            $this->incStat(1, 'turns_number', $this->getActivePlayerId());
         } catch ( Exception $e ) {
             $this->dump('err', $e);
         }
@@ -727,6 +773,131 @@ class chaisji extends Table
         // Create undo point at the start of the next players turn
         $this->undoSavePoint();
         /************ End of the game initialization *****/
+    }
+
+    /// @brief initialize the tables, this performs the token setup for the game
+    ///
+    /// Helper for setupNewGame - updates $this->tokens
+    function initTables()
+    {
+        // ROUND will contain the round.  The game is played over 5 rounds.
+        $this->tokens->initGlobalIndex('ROUND', 1);
+
+        $num = $this->getNumPlayers();
+
+        // 1. Tea flavors.  12 each of mint jasmine lemon ginger berries and lavender
+        foreach ( $this->ordered_flavors as $res )
+        {
+            if (strcasecmp($res,'wild') != 0)
+            {
+                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 12);
+            }
+            else
+            {
+                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 6);
+            }
+        }
+        $this->tokens->shuffle('flavor_stock');
+
+        // Create 3 rows of 6 tokens for the market (maintaint order with 0 to left and 5 to right most)
+        for ($i = 0; $i < 6; $i++)
+        {
+            $this->tokens->pickTokensForLocation(1, 'flavor_stock', 'market_1', $i);
+            $this->tokens->pickTokensForLocation(1, 'flavor_stock', 'market_2', $i);
+            $this->tokens->pickTokensForLocation(1, 'flavor_stock', 'market_3', $i);
+        }
+
+        // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 any_pantry
+        foreach ( $this->ordered_pantry as $res )
+        {
+            if (strcasecmp($res,'any_pantry') != 0)
+            {
+                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 10);
+            }
+            else
+            {
+                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 5);
+            }
+        }
+        $this->tokens->shuffle('pantry_stock');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_1');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_2');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_3');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_4');
+        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_5');
+
+        // 3. Tip tokens.  6, deal one per player
+        $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
+        $this->tokens->shuffle('tip_stock');
+        $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_area');
+        // need to maintain order of tip area since these are secret
+        $this->tokens->shuffle('tip_area');
+
+        // 4. Ability cards.  8 total in game, deal 3
+        $this->tokens->createTokensPack('card_ability_{INDEX}', "ability_deck", 8);
+        $this->tokens->shuffle('ability_deck');
+        $this->tokens->pickTokensForLocation(3, 'ability_deck', 'ability_area');
+
+        // 4a. If card_ability_2 is taken then put 3 flavor tokens on the card
+        $specialToken = $this->tokens->getTokenInfo('card_ability_2');
+        if ($specialToken['location'] == 'ability_area')
+        {
+            $this->tokens->pickTokensForLocation(3, 'flavor_stock', 'card_ability_2');
+        }
+
+        // 5. Tea tokens. 6 per player
+        // 6. Customer cards. 11 per player
+        //  1 in reserve
+        //  1 in plaza
+        //  6 in deck
+        //  Remaining are discarded
+        // 7. Money (1 for first player and 2 for everyone else)
+        $money = 1;
+        foreach ( $this->players_basic as $player_id => $player_info )
+        {
+            $color = $player_info ['player_color'];
+            // 5.
+            $this->tokens->createTokensPack("tea_{INDEX}_$color", "player_$color", 6);
+            // 6.
+            $this->tokens->createTokensPack("customer_{INDEX}_$color", "player_deck_$color", 11);
+            $this->tokens->shuffle("player_deck_$color");
+            $this->tokens->pickTokensForLocation(1, "player_deck_$color", 'plaza_area');
+            $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
+            $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
+            // 7.
+            $this->setPlayerMoney($player_id, $money);
+            $money = 2;
+        }
+        // 8. Now shuffle customer deck and deal 2 more to the plaza
+        $this->tokens->shuffle('customer_deck');
+        $this->tokens->pickTokensForLocation(2, 'customer_deck', 'plaza_area');
+
+        // Commit globals
+        $this->tokens->commitGlobalIndex('ROUND');
+
+        // Setup reshuffle of tiles
+        $this->tokens->autoreshuffle = true;
+        $this->tokens->autoreshuffle_custom['flavor_stock'] = 'flavor_discard';
+        $this->tokens->autoreshuffle_custom['pantry_stock'] = 'pantry_discard';
+    }
+
+    /// @brief Get the number of players in this game
+    /// @returns int  the number of players in the game
+    public function getNumPlayers()
+    {
+        if (!isset($this->players_basic))
+        {
+            $this->players_basic = $this->loadPlayersBasicInfos();
+        }
+        return count($this->players_basic);
+    }
+
+    /// @brief Get the player id of the first player
+    /// @returns int  the player id of the first player
+    public function getFirstPlayerId()
+    {
+        $tableData = $this->getNextPlayerTable();
+        return $tableData[0];
     }
 
     /// getAllDatas:
@@ -774,7 +945,7 @@ class chaisji extends Table
             if ($loc == 'tip_area')
             {
                 // for tip jars the items are hidden
-                $tips = $this->tokens->getTokensInLocation($loc);
+                $tips = $this->tokens->getTokensInLocation($loc, null, 'token_state');
                 for ($x = 0; $x < count($tips); $x++)
                 {
                     array_push($result['tokens'][$locValue]['items'], "tip_pos_$x");
@@ -783,7 +954,7 @@ class chaisji extends Table
             else
             {
                 // Normal fill directly from the database
-                $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc));
+                $this->fillArrayItems($result['tokens'][$locValue]['items'], $this->tokens->getTokensInLocation($loc, null, 'token_state'));
             }
             $locValue++;
         }
@@ -818,7 +989,7 @@ class chaisji extends Table
         }
 
         // Round information
-        $result['round'] =  $this->tokens->syncGlobalIndex('ROUND');
+        $result['round'] = $this->tokens->syncGlobalIndex('ROUND');
 
         return $result;
     }
@@ -842,9 +1013,19 @@ class chaisji extends Table
     /// (see states.inc.php)
     function getGameProgression()
     {
-        // TODO: compute and return the game progression
+        $round = $this->tokens->syncGlobalIndex('ROUND');
+        $num = $this->getNumPlayers();
 
-        return 0;
+        // Use number of tip tokens as the game progression
+        // Each round contains numPlayers tip tokens for 5 rounds
+        // So total number of tip tokens is 5*numPlayers
+        $total = 5 * $num;
+
+        // Now calculate the total number of tips taken already in the game
+        $progress = ($round * $num) - $this->tokens->countTokensInLocation('tip_area');
+
+        // now calculate and return percentage
+        return intval(($progress * 100) / $total);
     }
 
 
@@ -857,6 +1038,63 @@ class chaisji extends Table
     }
 
     // Test function
+    function clearTips()
+    {
+        $this->tokens->moveAllTokensInLocation('tip_area', 'tip_stock', null, 100);
+
+        $tokensAddedToBoard = array();
+        $tokens = $this->tokens->getTokensInLocation('tip_stock', 100);
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        if (count($tokensAddedToBoard) > 0)
+        {
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('User function - reset tips'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
+        }
+    }
+
+    function resetAbilities()
+    {
+        $this->tokens->moveAllTokensInLocation('ability_area', 'ability_deck', null, 100);
+        $this->tokens->moveAllTokensInLocation('card_ability_2', 'flavor_discard', null, 100);
+
+        $tokensAddedToBoard = array();
+        $tokens = $this->tokens->getTokensInLocation('ability_deck', 100);
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        $tokens = $this->tokens->getTokensInLocation('flavor_discard', 100);
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        if (count($tokensAddedToBoard) > 0)
+        {
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('User function - clear abilities'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
+        }
+
+        // Reset abilities to use
+        $tokensAddedToBoard = array();
+        $this->tokens->shuffle('ability_deck');
+        $tokens = $this->tokens->pickTokensForLocation(3, 'ability_deck', 'ability_area');
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+
+        // 4a. If card_ability_2 is taken then put 3 flavor tokens on the card
+        $specialToken = $this->tokens->getTokenInfo('card_ability_2');
+        if ($specialToken['location'] == 'ability_area')
+        {
+            $tokens = $this->tokens->pickTokensForLocation(3, 'flavor_stock', 'card_ability_2');
+            $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        }
+
+        if (count($tokensAddedToBoard) > 0)
+        {
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('User function - add abilities'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
+        }
+    }
+
     function dumpTokensPerLocation()
     {
         self::trace("Immer Debug Function");
@@ -884,6 +1122,9 @@ class chaisji extends Table
         $data = self::getCollectionFromDb( $sql );
 
         $this->dump('dumpActivePlayer', $data);
+
+        $data2 = $this->getNextPlayerTable();
+        $this->dump('getNextPlayerTable', $data2);
     }
 
     function testSavePoint()
@@ -986,113 +1227,6 @@ class chaisji extends Table
         $this->error("Internal Error during move: $log|");
         //throw new feException($log);
         throw new BgaUserException(self::_("Internal Error. That should not have happened. Please raise a bug. ") . $log); // TODO remove
-    }
-
-    /// @brief initialize the tables, this performs the token setup for the game
-    ///
-    /// Helper for setupNewGame - updates $this->tokens
-    function initTables()
-    {
-        // ROUND will contain the round.  The game is played over 5 rounds.
-        $this->tokens->initGlobalIndex('ROUND', 1);
-
-        $num = $this->getNumPlayers();
-
-        // 1. Tea flavors.  12 each of mint jasmine lemon ginger berries and lavender
-        foreach ( $this->ordered_flavors as $res )
-        {
-            if (strcasecmp($res,'wild') != 0)
-            {
-                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 12);
-            }
-            else
-            {
-                $this->tokens->createTokensPack("flavor_{INDEX}_$res", "flavor_stock", 6);
-            }
-        }
-        $this->tokens->shuffle('flavor_stock');
-
-        // Create 3 rows of 6 tokens for the market
-        $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_1');
-        $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_2');
-        $this->tokens->pickTokensForLocation(6, 'flavor_stock', 'market_3');
-
-        // 2. Pantry tokens.  10 each of milk sugar honey vanilla chai + 5 any_pantry
-        foreach ( $this->ordered_pantry as $res )
-        {
-            if (strcasecmp($res,'any_pantry') != 0)
-            {
-                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 10);
-            }
-            else
-            {
-                $this->tokens->createTokensPack("pantry_{INDEX}_$res", "pantry_stock", 5);
-            }
-        }
-        $this->tokens->shuffle('pantry_stock');
-        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_1');
-        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_2');
-        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_3');
-        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_4');
-        $this->tokens->pickTokensForLocation(1, 'pantry_stock', 'spot_5');
-
-        // 3. Tip tokens.  6, deal one per player
-        $this->tokens->createTokensPack('tip_{INDEX}', "tip_stock", 6);
-        $this->tokens->shuffle('tip_stock');
-        $this->tokens->pickTokensForLocation($num, 'tip_stock', 'tip_area');
-
-        // 4. Ability cards.  8 total in game, deal 3
-        $this->tokens->createTokensPack('card_ability_{INDEX}', "ability_deck", 8);
-        $this->tokens->shuffle('ability_deck');
-        $this->tokens->pickTokensForLocation(3, 'ability_deck', 'ability_area');
-
-        // 4a. If card_ability_2 is taken then put 3 flavor tokens on the card
-        $specialToken = $this->tokens->getTokenInfo('card_ability_2');
-        if ($specialToken['location'] == 'ability_area')
-        {
-            $this->tokens->pickTokensForLocation(3, 'flavor_stock', 'card_ability_2');
-        }
-
-        // 5. Tea tokens. 6 per player
-        // 6. Customer cards. 11 per player
-        //  1 in reserve
-        //  1 in plaza
-        //  6 in deck
-        //  Remaining are discarded
-        // 7. Money (1 for first player and 2 for everyone else)
-        $money = 1;
-        foreach ( $this->players_basic as $player_id => $player_info )
-        {
-            $color = $player_info ['player_color'];
-            // 5.
-            $this->tokens->createTokensPack("tea_{INDEX}_$color", "player_$color", 6);
-            // 6.
-            $this->tokens->createTokensPack("customer_{INDEX}_$color", "player_deck_$color", 11);
-            $this->tokens->shuffle("player_deck_$color");
-            $this->tokens->pickTokensForLocation(1, "player_deck_$color", 'plaza_area');
-            $this->tokens->pickTokensForLocation(1, "player_deck_$color", "player_$color");
-            $this->tokens->pickTokensForLocation(6, "player_deck_$color", 'customer_deck');
-            // 7.
-            $this->setPlayerMoney($player_id, $money);
-            $money = 2;
-        }
-        // 8. Now shuffle customer deck and deal 2 more to the plaza
-        $this->tokens->shuffle('customer_deck');
-        $this->tokens->pickTokensForLocation(2, 'customer_deck', 'plaza_area');
-
-        // Commit globals
-        $this->tokens->commitGlobalIndex('ROUND');
-    }
-
-    /// @brief Get the number of players in this game
-    /// @returns int  the number of players in the game
-    public function getNumPlayers()
-    {
-        if (!isset($this->players_basic))
-        {
-            $this->players_basic = $this->loadPlayersBasicInfos();
-        }
-        return count($this->players_basic);
     }
 
 
@@ -1391,7 +1525,6 @@ class chaisji extends Table
         {
             if (!array_key_exists($loc, $tokensPerLocation))
             {
-                ///TODO - need to handle case where pantry_stock is empty
                 $tokens = $this->tokens->pickTokensForLocation(1, 'pantry_stock', $loc);
                 $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
             }
@@ -1406,22 +1539,38 @@ class chaisji extends Table
         }
 
         // Check market for refresh
-        $pantryAreas = array('market_1', 'market_2', 'market_3');
+        $marketAreas = array('market_1', 'market_2', 'market_3');
         $tokensAddedToBoard = array();
 
-        foreach ($pantryAreas as $pos => $loc)
+        foreach ($marketAreas as $pos => $loc)
         {
+            $start = 0;
             // If there are no items
             if (!array_key_exists($loc, $tokensPerLocation))
             {
-                ///TODO - need to handle case where pantry_stock is empty
-                $tokens = $this->tokens->pickTokensForLocation(6, 'flavor_stock', $loc);
-                $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+                // No changes - pick a whole new set
             }
-            else if ($tokensPerLocation[$loc] < 6)
+            else
             {
-                $numToSelect = 6 - $tokensPerLocation[$loc];
-                $tokens = $this->tokens->pickTokensForLocation($numToSelect, 'flavor_stock', $loc);
+                // If number of tokens is 6 then no new items will be added below
+                $start = $tokensPerLocation[$loc];
+                if ($start < 6)
+                {
+                    // Get items sorted by token_state
+                    $items = array();
+                    $this->fillArrayItems($items, $this->tokens->getTokensInLocation($loc, null, 'token_state'));
+
+                    // Update order of items in the list to make sure the numbering is correct
+                    for ($i = 0; $i < $tokensPerLocation[$loc]; $i++)
+                    {
+                        $this->tokens->updateStateToken($items[$i], $i);
+                    }
+                }
+            }
+            // Create 3 rows of 6 tokens for the market (maintaint order with 0 to left and 5 to right most)
+            for ($i = $start; $i < 6; $i++)
+            {
+                $tokens = $this->tokens->pickTokensForLocation(1, 'flavor_stock', $loc, $i);
                 $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
             }
         }
@@ -1434,18 +1583,23 @@ class chaisji extends Table
             );
         }
 
+        // Check for customer refresh
+        // TODO - If a player has zero tea tokens then cards with that type must be removed from the game
+        // Make sure the number of cards in the plaza is number of players + 2
+        $numberOfCustomersToAdd = ($this->getNumPlayers() + 2) - $tokensPerLocation['plaza_area'];
+        if ($numberOfCustomersToAdd > 0)
+        {
+            $tokens = $this->tokens->pickTokensForLocation($numberOfCustomersToAdd, 'customer_deck', 'plaza_area');
+            $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+
+            self::notifyAllPlayers("tokenUpdate", clienttranslate('Plaza reset'), array(
+                'player_id' => 0,
+                'token' => $tokensAddedToBoard)
+            );
+        }
+
         // Set active player to the next person in turn order
         $next_player_id = $this->activeNextPlayer();
-
-        // If number of tip jars is zero then setup a new round
-
-
-        ////$next_player_id = $this->activeNextPlayerCustom();
-        //if ($next_player_id == null) {
-            // active player wins the game
-            //$this->gamestate->nextState('last');
-            //return;
-        //}
 
         // Reset globals as turn advances
         self::setGameStateInitialValue('market_state', 1);
@@ -1457,7 +1611,119 @@ class chaisji extends Table
         ///TODO if next player already has 3 customers reserved then customer option is not available
         self::setGameStateInitialValue('customer_state', 1);
 
-        // Otherwise continue with next players turn
+        // If number of tip jars is zero then setup a new round
+        if (!array_key_exists('tip_area', $tokensPerLocation))
+        {
+            // Every player gets the same number of turns, so verify we are at the last player
+            $round = $this->tokens->syncGlobalIndex('ROUND');
+
+            if ($round < 5)
+            {
+                $this->incStat(1, 'turns_number', $next_player_id);
+                // End of round - not the end of the game
+                $this->gamestate->nextState('endRound');
+            }
+            else if (($round >= 5) && ($next_player_id == $this->getFirstPlayerId()))
+            {
+                // We have come to the end of games
+                $this->gamestate->nextState('endGame');
+            }
+            else
+            {
+                $this->incStat(1, 'turns_number', $next_player_id);
+                // Last round - some players still get one last turn
+                // Go to next players turn
+                $this->gamestate->nextState('next');
+
+                // Create undo point at the start of the next players turn
+                $this->undoSavePoint();
+            }
+        }
+        else
+        {
+            $this->incStat(1, 'turns_number', $next_player_id);
+            // Go to next players turn
+            $this->gamestate->nextState('next');
+
+            // Create undo point at the start of the next players turn
+            $this->undoSavePoint();
+        }
+    }
+
+    function st_gameNextRound()
+    {
+        // Advance the round number
+        $round = $this->tokens->syncGlobalIndex('ROUND') + 1;
+        $this->tokens->setGlobalIndex('ROUND', $round);
+
+        // Perform the following actions
+        //////////////////////////////////////////////////////////////////////////
+        // 1. Shuffle the tip tokens and place one for each player
+        $this->tokens->shuffle('tip_stock');
+        $this->tokens->pickTokensForLocation($this->getNumPlayers(), 'tip_stock', 'tip_area');
+        // need to maintain order of tip area since these are secret
+        $this->tokens->shuffle('tip_area');
+
+        $tokensAddedToBoard = array();
+        $tokens = $this->tokens->getTokensInLocation('tip_area', null, 'token_state');
+        // TBD - change tip to obscure name to "tip_pos_$x"
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+
+        // Send update to all players
+        self::notifyAllPlayers("tokenUpdate", clienttranslate('Tips reset'), array(
+            'player_id' => 0,
+            'token' => $tokensAddedToBoard)
+        );
+
+        //////////////////////////////////////////////////////////////////////////
+        // 2. Discard the first flavor tile from each market row and replace at the end with a new tile
+        $tokensAddedToBoard = array();
+
+        $marketAreas = array('market_1', 'market_2', 'market_3');
+        foreach ($marketAreas as $pos => $loc)
+        {
+            // Remove first item from location and place in discard pile
+            $tokens = $this->tokens->pickTokensForLocation(1, $loc, 'flavor_discard');
+            $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+
+            // Get items sorted by token_state
+            $items = array();
+            $this->fillArrayItems($items, $this->tokens->getTokensInLocation($loc, null, 'token_state'));
+
+            // Update order of items in the list to make sure the numbering is correct
+            for ($i = 0; $i < $this->tokens->countTokensInLocation($loc); $i++)
+            {
+                $this->tokens->updateStateToken($items[$i], $i);
+            }
+            // Add 6th item to each row and add to items to update on the board
+            $tokens = $this->tokens->pickTokensForLocation(1, 'flavor_stock', $loc, 6);
+            $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        }
+
+        self::notifyAllPlayers("tokenUpdate", clienttranslate('Market reset'), array(
+            'player_id' => 0,
+            'token' => $tokensAddedToBoard)
+        );
+
+        //////////////////////////////////////////////////////////////////////////
+        // 3. Draw a new ability card and let the next player pick which card is eliminated
+        $tokensAddedToBoard = array();
+        $tokens = $this->tokens->pickTokensForLocation(1, 'ability_deck', 'ability_area');
+        $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+
+        // If new ability is card_ability_2 then put 3 flavor tokens on the card
+        if (!array_key_exists('card_ability_2', $tokens))
+        {
+            $tokens = $this->tokens->pickTokensForLocation(3, 'flavor_stock', 'card_ability_2');
+            $tokensAddedToBoard = array_merge($tokensAddedToBoard, array_values($tokens));
+        }
+
+        self::notifyAllPlayers("tokenUpdate", clienttranslate('A new ability added to the table.  One must now be discarded.'), array(
+            'player_id' => 0,
+            'token' => $tokensAddedToBoard)
+        );
+
+        // Advance game state
         $this->gamestate->nextState('next');
 
         // Create undo point at the start of the next players turn

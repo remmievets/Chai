@@ -137,16 +137,17 @@ $machinestates = array(
         "updateGameProgression" => true,
         "transitions" => array(
             "next" => 2,
-            "endRound" => 50 )
+            "endRound" => 50,
+            "endGame" => 99 )
     ),
     50 => array(
         "name" => "gameNextRound",
         "description" => clienttranslate('Setup for next round'),
         "type" => "game",
         "action" => "st_gameNextRound",
+        "updateGameProgression" => true,
         "transitions" => array(
-            "next" => 51,
-            "endGame" => 99 )
+            "next" => 51 )
     ),
     51 => array(
         "name" => "playerNextRound",
